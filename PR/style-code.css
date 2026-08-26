@@ -1,0 +1,254 @@
+/* Reset Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0a0a12;
+    color: #ffffff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Helper Classes */
+.hidden {
+    display: none !important;
+}
+
+/* 1. Landing Hero Section */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    padding: 20px;
+}
+
+.main-title {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: linear-gradient(45deg, #00f0ff, #ff007f, #7000ff, #00f0ff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: colorShift 6s ease infinite;
+}
+
+@keyframes colorShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.sub-title {
+    font-size: 1.5rem;
+    color: #a0a0b0;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.glass-btn {
+    padding: 12px 35px;
+    font-size: 1.1rem;
+    color: #00f0ff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #00f0ff;
+    border-radius: 30px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.glass-btn:hover {
+    background: #00f0ff;
+    color: #0a0a12;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+}
+
+/* 2. Projects Grid Section */
+.projects-section {
+    padding: 50px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: #ffffff;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-8px);
+    border-color: #00f0ff;
+    box-shadow: 0 10px 25px rgba(0, 240, 255, 0.2);
+}
+
+.folder-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+}
+
+/* 3. Popup Modal & Code Scrollbar */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.glass-card-modal {
+    background: #1d1d26;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    padding: 25px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #ff007f;
+}
+
+/* Logo Tabs */
+.code-tabs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    color: #fff;
+    border-bottom: 2px solid #00f0ff;
+}
+
+.html-color { color: #e34c26; }
+.css-color { color: #264de4; }
+.js-color { color: #f7df1e; }
+
+/* Scrollable Code Box */
+.code-container {
+    position: relative;
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.code-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.code-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+.code-container::-webkit-scrollbar-thumb:hover {
+    background: #00f0ff;
+}
+
+.code-container pre {
+    margin: 0;
+    padding: 20px;
+    background: transparent !important;
+}
+
+.code-container code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Copy Button */
+.copy-btn {
+    position: sticky;
+    top: 10px;
+    float: right;
+    margin-right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: #00f0ff;
+    color: #000;
+}

@@ -1,0 +1,164 @@
+@import url('https://use.fontawesome.com/releases/v6.5.1/css/all.css');
+@import url('https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900');
+
+body {
+  height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #222327;
+  color: white;
+}
+
+.navigation {
+  position: relative;
+  width: 450px;
+  height: 80px;
+  background: #2f2f2f;
+  display: flex;
+  justify-content: center;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  z-index: 1;
+}
+
+ul {
+  position: relative;
+  display: flex;
+  width: 400px;
+  margin: 0;
+  padding: 0;
+  z-index: 1000;
+}
+
+li {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  list-style: none;
+  z-index: 1;
+}
+
+a {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  font-weight: 500;
+}
+
+.icon {
+  position: relative;
+  display: block;
+  color: #ffffff80;
+  line-height: 85px;
+  font-size: 1.5em;
+  text-align: center;
+  transition: 0.5s;
+}
+
+a:hover .icon {
+  color: #ffffff;
+}
+
+li.active .icon {
+  transform: translateY(-8px);
+  color: #29fd53;
+}
+
+.text {
+  position: absolute;
+  font-weight: 400;
+  font-size: 0.6em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+  transform: translateY(10px);
+  color: #222327;
+  transition: 0.5s;
+  opacity: 0;
+}
+
+li.active .text {
+  transform: translateY(16px);
+  opacity: 1;
+}
+
+.indicator {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.5s;
+  z-index: -1;
+}
+
+.indicator::before {
+  content: '';
+  position: absolute;
+  width: 80%;
+  height: 16px;
+  background: #29fd53;
+  bottom: 14px;
+  border-radius: 10px;
+}
+
+.indicator::after {
+  content: "";
+  width: 7.5px;
+  height: 7.5px;
+  position: absolute;
+  top: -3px;
+  border-radius: 50%;
+  background: #333;
+  box-shadow:
+    0 0 0 2px #29fd53,
+    50px 50px #29fd53,
+    40px 0 #29fd53,
+    0 40px #29fd53;
+  transform: rotate(45deg);
+  animation: animate 2s ease-in-out infinite;
+}
+
+@keyframes animate {
+
+  0%,
+  100% {
+    transform: rotate(35deg);
+  }
+
+  50% {
+    transform: rotate(55deg);
+  }
+}
+
+.indicator {
+  --pos-1: translateX(calc(80px * 1));
+  --pos-2: translateX(calc(80px * 2));
+  --pos-3: translateX(calc(80px * 3));
+  --pos-4: translateX(calc(80px * 4));
+}
+
+li:nth-child(2).active~.indicator {
+  transform: var(--pos-1);
+}
+
+li:nth-child(3).active~.indicator {
+  transform: var(--pos-2);
+}
+
+li:nth-child(4).active~.indicator {
+  transform: var(--pos-3);
+}
+
+li:nth-child(5).active~.indicator {
+  transform: var(--pos-4);
+}
