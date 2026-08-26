@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metallic Glassy IDE</title>
+  <link rel="stylesheet" href="style web .css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+
+  <!-- Warning Modal -->
+  <div id="warning-modal" class="modal-overlay">
+    <div class="glass-card modal-box">
+      <h2>⚠️ Important Warning</h2>
+      <p>This IDE does not use a cloud database. All your work is stored locally. Please save your files before exiting or refreshing, otherwise your unsaved data will be permanently lost.</p>
+      <button id="start-btn" class="glass-btn primary">Get Started</button>
+    </div>
+  </div>
+
+  <!-- Main IDE Workspace -->
+  <div id="app-container" class="hidden">
+    <header class="glass-header">
+      <div class="logo">⚡ Metallic IDE</div>
+    </header>
+
+    <main class="workspace">
+      
+      <!-- Left: Live Preview -->
+      <section class="panel preview-panel glass-card">
+        <div class="panel-header">
+          <span>Live Preview</span>
+        </div>
+        <iframe id="preview-frame"></iframe>
+      </section>
+
+      <!-- Center: File Manager -->
+      <section class="panel file-manager glass-card">
+        <h3>File Manager</h3>
+        <div class="file-actions">
+          <button id="new-file-btn" class="glass-btn">📄 New File</button>
+          <button id="open-folder-btn" class="glass-btn">📂 Open Folder</button>
+        </div>
+        <ul id="file-list" class="file-tree"></ul>
+      </section>
+
+      <!-- Right: Code Editor -->
+      <section class="panel editor-panel glass-card">
+        <div class="panel-header">
+          <span id="current-filename">index.html</span>
+          <button id="save-btn" class="glass-btn success">💾 Save</button>
+        </div>
+        <div class="editor-container">
+          <div id="line-numbers">1</div>
+          <div class="code-wrapper">
+            <textarea id="code-input" spellcheck="false" placeholder="Write your code here..."></textarea>
+            <pre id="highlighting" aria-hidden="true"><code class="language-html" id="highlighting-content"></code></pre>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="script web .js"></script>
+</body>
+</html>

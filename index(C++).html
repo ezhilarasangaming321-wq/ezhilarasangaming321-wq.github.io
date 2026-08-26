@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ Master - 10 Levels & Quest Competition</title>
+    <!-- Icons & Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #030712;
+            --glass-bg: rgba(15, 23, 42, 0.75);
+            --glass-border: rgba(56, 189, 248, 0.25);
+            --cpp-blue: #00599C;
+            --cpp-cyan: #38bdf8;
+            --text-silver: #e0f2fe;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(0, 89, 156, 0.15) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glass-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-glass:hover:not(:disabled) {
+            border-color: var(--cpp-cyan);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-glass:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(0, 89, 156, 0.4));
+            border-color: rgba(56, 189, 248, 0.5);
+            color: var(--text-silver);
+        }
+
+        header { margin-bottom: 25px; text-align: center; }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            background: linear-gradient(180deg, #ffffff 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header h1 span { color: var(--cpp-cyan); -webkit-text-fill-color: var(--cpp-cyan); }
+
+        .screen { width: 100%; max-width: 720px; display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* LEVEL MENU */
+        .level-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .level-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--glass-border);
+        }
+
+        .level-card:hover:not(.locked) { border-color: var(--cpp-cyan); transform: translateY(-2px); }
+        .level-card.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.8); }
+        .level-card.quest-card { 
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(0, 89, 156, 0.3)); 
+            border-color: rgba(56, 189, 248, 0.6); 
+        }
+
+        .level-left { display: flex; align-items: center; gap: 14px; }
+
+        .level-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--cpp-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--cpp-cyan);
+            font-weight: bold;
+        }
+
+        .level-info h3 { font-size: 1rem; color: #fff; }
+        .level-info p { font-size: 0.8rem; color: #94a3b8; }
+
+        /* STEP & QUEST SCREENS */
+        .step-container { padding: 24px; position: relative; }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+        }
+
+        .step-indicator { font-size: 0.85rem; color: var(--cpp-cyan); font-weight: 600; }
+
+        .quest-score-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--cpp-cyan);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            color: var(--cpp-cyan);
+            font-size: 0.85rem;
+        }
+
+        .step-content-box {
+            min-height: 240px;
+            background: rgba(3, 7, 18, 0.85);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .step-content-box h3 { color: var(--cpp-cyan); margin-bottom: 10px; font-size: 1.1rem; }
+        .step-content-box p { font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 14px; }
+
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        @media (max-width: 550px) { .preview-grid { grid-template-columns: 1fr; } }
+
+        .code-box, .output-box {
+            background: #020617;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.82rem;
+        }
+
+        .box-title {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+        }
+
+        .code-box code { font-family: 'Fira Code', monospace; color: #e0f2fe; white-space: pre-wrap; word-break: break-all; }
+        .output-box .render-area { background: #090d16; color: #38bdf8; padding: 10px; border-radius: 6px; min-height: 60px; font-family: 'Fira Code', monospace; overflow-x: auto; }
+
+        .navigation-btns { display: flex; justify-content: space-between; align-items: center; }
+
+        .quiz-input-box {
+            width: 100%;
+            background: #020617;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            margin-top: 12px;
+            outline: none;
+        }
+
+        .feedback-text { margin-top: 12px; font-size: 0.9rem; font-weight: 600; }
+        .success-text { color: #4ade80; }
+        .error-text { color: #f87171; }
+
+        /* MODAL POPUP FOR CERTIFICATE */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-card h3 { color: var(--cpp-cyan); margin-bottom: 12px; }
+        .modal-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #020617;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>C++ <span>MASTER</span></h1>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Complete 10-Level Systems Programming Course & Quest</p>
+    </header>
+
+    <!-- 1. LEVEL MENU -->
+    <section class="screen active" id="screen-levels">
+        <div class="glass-box level-card-list" id="levels-container"></div>
+    </section>
+
+    <!-- 2. LEARNING SCREEN -->
+    <section class="screen" id="screen-learning">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Levels
+                </button>
+                <span class="step-indicator" id="step-indicator-text">Step 1 of 6</span>
+            </div>
+
+            <div class="step-content-box" id="step-display"></div>
+
+            <div class="navigation-btns">
+                <button class="btn-glass" id="btn-prev" onclick="prevStep()">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                <button class="btn-glass btn-primary" id="btn-next" onclick="nextStep()">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. QUEST COMPETITION SCREEN -->
+    <section class="screen" id="screen-quest">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Exit Quest
+                </button>
+                <span class="step-indicator" id="quest-q-num">Question 1 of 10</span>
+                <div class="quest-score-badge" id="quest-score-text">Score: 0%</div>
+            </div>
+
+            <div class="step-content-box" id="quest-display"></div>
+
+            <div class="navigation-btns" style="justify-content: flex-end;">
+                <button class="btn-glass btn-primary" id="btn-quest-submit" onclick="submitQuestAnswer()">
+                    Submit Answer <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. QUEST RESULT SCREEN -->
+    <section class="screen" id="screen-result">
+        <div class="glass-box step-container" style="text-align: center;">
+            <i class="fa-solid fa-code" style="font-size: 3.5rem; color: #38bdf8; margin-bottom: 12px;"></i>
+            <h2 style="color: #fff;" id="result-title">Congratulations!</h2>
+            <p style="margin: 10px 0; color: #94a3b8;" id="result-desc"></p>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--cpp-cyan); margin: 15px 0;" id="result-score-val">0%</div>
+
+            <button class="btn-glass btn-primary" id="btn-cert" onclick="openCertModal()" style="margin-top: 10px;">
+                <i class="fa-solid fa-download"></i> Download C++ Certificate
+            </button>
+            <br><br>
+            <button class="btn-glass" onclick="goBackToLevels()">Back to Levels</button>
+        </div>
+    </section>
+
+    <!-- MODAL FOR USER DETAILS -->
+    <div class="modal-overlay" id="modal-cert">
+        <div class="modal-card">
+            <h3>C++ Master Certificate Details</h3>
+            <label style="font-size: 0.8rem; color:#94a3b8;">Enter Your Full Name:</label>
+            <input type="text" id="user-name" placeholder="e.g. Bjarne Stroustrup">
+            <label style="font-size: 0.8rem; color:#94a3b8;">Enter Your Age:</label>
+            <input type="number" id="user-age" placeholder="e.g. 18">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn-glass" onclick="closeCertModal()">Cancel</button>
+                <button class="btn-glass btn-primary" onclick="generateCertificate()">Generate & Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Canvas for Certificate Image Generation -->
+    <canvas id="certCanvas" width="800" height="600" style="display:none;"></canvas>
+
+    <script>
+        const levelsData = {
+            1: { title: "Level 1: Output & Structure (std::cout)", steps: [
+                { title: "Step 1: Header & Main", desc: "Every C++ program starts with #include <iostream> and main().", code: "#include <iostream>\nint main() {\n  return 0;\n}", preview: "Program initialized" },
+                { title: "Step 2: std::cout Output", desc: "std::cout is used with << insertion operator to print text.", code: "std::cout << \"Hello C++\";", preview: "Hello C++" },
+                { title: "Step 3: Newlines (std::endl)", desc: "std::endl or '\\n' moves text output to a new line.", code: "std::cout << \"Line 1\" << std::endl;", preview: "Line 1\n" },
+                { title: "Step 4: Using Namespace", desc: "using namespace std allows using cout directly.", code: "using namespace std;\ncout << \"Welcome\";", preview: "Welcome" },
+                { title: "Step 5: Printing Numbers", desc: "Direct numerical literals can be output directly.", code: "std::cout << 100 + 50;", preview: "150" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ code to print 'Hello' using std::cout and std::endl:", expectedAnswer: "std::cout << \"hello\" << std::endl;", altAnswer: "std::cout<<\"hello\"<<std::endl;" }
+            ]},
+            2: { title: "Level 2: Data Types & Variables", steps: [
+                { title: "Step 1: Integer Types (int)", desc: "int stores whole numbers without decimals.", code: "int score = 100;", preview: "100" },
+                { title: "Step 2: Floating Point (double)", desc: "double stores decimal floating numbers.", code: "double pi = 3.14159;", preview: "3.14159" },
+                { title: "Step 3: Character & String", desc: "char for single character '', string for text \"\".", code: "char grade = 'A';\nstd::string name = \"Alex\";", preview: "A, Alex" },
+                { title: "Step 4: Boolean (bool)", desc: "bool holds true (1) or false (0) values.", code: "bool isPassed = true;", preview: "1" },
+                { title: "Step 5: Constant Variables", desc: "const keyword prevents variable modification.", code: "const int MAX_USERS = 50;", preview: "50 (Read-only)" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ integer variable declaration named x equal to 10:", expectedAnswer: "int x = 10;", altAnswer: "int x=10;" }
+            ]},
+            3: { title: "Level 3: User Input (std::cin)", steps: [
+                { title: "Step 1: std::cin Extraction", desc: "std::cin uses >> extraction operator to read values.", code: "int age;\nstd::cin >> age;", preview: "Awaiting input..." },
+                { title: "Step 2: Reading Strings", desc: "std::cin >> str reads single word up to whitespace.", code: "std::string word;\nstd::cin >> word;", preview: "Single word read" },
+                { title: "Step 3: Reading Full Line", desc: "std::getline(std::cin, str) reads entire line.", code: "std::string fullName;\nstd::getline(std::cin, fullName);", preview: "Full line string" },
+                { title: "Step 4: Chaining Inputs", desc: "Chain multiple >> operators to read consecutive variables.", code: "std::cin >> x >> y;", preview: "Multiple values read" },
+                { title: "Step 5: Input with Prompt", desc: "Always output prompt message before taking input.", code: "std::cout << \"Enter age: \";\nstd::cin >> age;", preview: "Prompt displayed" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ statement to take user input into variable age using std::cin:", expectedAnswer: "std::cin >> age;", altAnswer: "std::cin>>age;" }
+            ]},
+            4: { title: "Level 4: Conditionals (if, else & switch)", steps: [
+                { title: "Step 1: If Statement", desc: "Execute block if relational condition holds true.", code: "if (age >= 18) {\n  std::cout << \"Adult\";\n}", preview: "Adult" },
+                { title: "Step 2: Else-If Ladder", desc: "Check multiple alternative expressions sequentially.", code: "if (score > 90) {}\nelse if (score > 75) {}", preview: "Ladder check" },
+                { title: "Step 3: Ternary Operator", desc: "Short conditional: condition ? trueVal : falseVal", code: "std::string res = (x > 0) ? \"Pos\" : \"Neg\";", preview: "Pos" },
+                { title: "Step 4: Switch Statement", desc: "Matches exact integral or char constant cases.", code: "switch(option) {\n  case 1: break;\n}", preview: "Case matched" },
+                { title: "Step 5: Logical Operators", desc: "&& (AND), || (OR), ! (NOT) boolean operators.", code: "if (a > 0 && b > 0) {}", preview: "Boolean condition" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ ternary statement returning 'Y' if x is equal to 5 else 'N':", expectedAnswer: "x == 5 ? 'Y' : 'N';", altAnswer: "x==5?'Y':'N';" }
+            ]},
+            5: { title: "Level 5: Loops (for, while, do-while)", steps: [
+                { title: "Step 1: For Loop", desc: "Standard loop with initializer, condition, and increment.", code: "for(int i=0; i<3; i++) {\n  std::cout << i;\n}", preview: "012" },
+                { title: "Step 2: While Loop", desc: "Continuously checks condition prior to each iteration.", code: "while(n < 5) {\n  n++;\n}", preview: "Loop complete" },
+                { title: "Step 3: Do-While Loop", desc: "Guarantees at least one execution before condition check.", code: "do {\n  x++;\n} while(x < 5);", preview: "Executed once min" },
+                { title: "Step 4: Break & Continue", desc: "break exits loop immediately; continue skips to next iteration.", code: "if(i == 2) break;", preview: "Loop terminated" },
+                { title: "Step 5: Range-based For Loop", desc: "Modern C++ iteration over containers.", code: "for(int val : nums) {\n  std::cout << val;\n}", preview: "Traversed items" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write standard C++ for loop header to iterate int i from 0 to less than 5:", expectedAnswer: "for(int i=0; i<5; i++)", altAnswer: "for (int i = 0; i < 5; i++)" }
+            ]},
+            6: { title: "Level 6: Functions & Prototypes", steps: [
+                { title: "Step 1: Basic Function", desc: "Return-type function name with parameter signature.", code: "int add(int a, int b) {\n  return a + b;\n}", preview: "Function defined" },
+                { title: "Step 2: Void Functions", desc: "void keyword indicates no value returned.", code: "void printMsg() {\n  std::cout << \"Hi\";\n}", preview: "Hi" },
+                { title: "Step 3: Pass by Value", desc: "Passes copy of argument variable to function.", code: "void update(int val) { val = 10; }", preview: "Original unchanged" },
+                { title: "Step 4: Pass by Reference (&)", desc: "Passes reference allowing direct modification.", code: "void update(int &val) { val = 10; }", preview: "Original updated" },
+                { title: "Step 5: Default Parameters", desc: "Provide default value if argument is omitted.", code: "void greet(std::string name = \"Guest\");", preview: "Guest" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ void function signature header named run with no parameters:", expectedAnswer: "void run()", altAnswer: "void run(void)" }
+            ]},
+            7: { title: "Level 7: Arrays & Vectors (STL)", steps: [
+                { title: "Step 1: Fixed Arrays", desc: "Fixed-size contiguous memory collection.", code: "int arr[3] = {10, 20, 30};", preview: "[10, 20, 30]" },
+                { title: "Step 2: Accessing Array", desc: "Zero-based index retrieval.", code: "std::cout << arr[0];", preview: "10" },
+                { title: "Step 3: std::vector dynamic array", desc: "Resizable array container from C++ STL.", code: "#include <vector>\nstd::vector<int> v;", preview: "Vector initialized" },
+                { title: "Step 4: Vector Methods", desc: "push_back adds element; size() gets current count.", code: "v.push_back(50);\nstd::cout << v.size();", preview: "1" },
+                { title: "Step 5: Traversing Vector", desc: "Use loop or iterator to iterate values.", code: "for(int x : v) std::cout << x;", preview: "50" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ statement to get total element count of vector v:", expectedAnswer: "v.size();", altAnswer: "v.size()" }
+            ]},
+            8: { title: "Level 8: Pointers & References", steps: [
+                { title: "Step 1: Reference Operator (&)", desc: "& gets raw memory address of variable.", code: "int val = 5;\nstd::cout << &val;", preview: "0x7ffe..." },
+                { title: "Step 2: Pointer Declaration (*)", desc: "Pointer holds memory address of another variable.", code: "int* ptr = &val;", preview: "Pointer stores address" },
+                { title: "Step 3: Dereferencing (*ptr)", desc: "* retrieves value stored at pointer address.", code: "std::cout << *ptr;", preview: "5" },
+                { title: "Step 4: Null Pointers", desc: "nullptr represents unassigned pointer address.", code: "int* ptr = nullptr;", preview: "Safe null pointer" },
+                { title: "Step 5: Dynamic Memory (new/delete)", desc: "Allocate heap memory dynamically.", code: "int* p = new int(100);\ndelete p;", preview: "Memory freed" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ pointer declaration named ptr storing address of int x:", expectedAnswer: "int* ptr = &x;", altAnswer: "int *ptr = &x;" }
+            ]},
+            9: { title: "Level 9: Classes & Object-Oriented (OOP)", steps: [
+                { title: "Step 1: Class Definition", desc: "Blueprints containing attributes and methods.", code: "class Car {\n  public:\n    std::string brand;\n};", preview: "Class defined" },
+                { title: "Step 2: Public vs Private", desc: "Access specifiers control visibility.", code: "private:\n  int speed;\npublic:\n  void drive();", preview: "Encapsulated" },
+                { title: "Step 3: Constructors", desc: "Special method executed when object is instantiated.", code: "Car() {\n  brand = \"Toyota\";\n}", preview: "Constructed" },
+                { title: "Step 4: Creating Objects", desc: "Instantiate object instances from class.", code: "Car myCar;\nmyCar.brand = \"Ford\";", preview: "Ford" },
+                { title: "Step 5: Member Methods", desc: "Functions defined inside class scope.", code: "void display() {\n  std::cout << brand;\n}", preview: "Method called" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write C++ statement to create object obj of class Student:", expectedAnswer: "Student obj;", altAnswer: "Student obj" }
+            ]},
+            10: { title: "Level 10: File I/O & Streams (fstream)", steps: [
+                { title: "Step 1: File Headers", desc: "#include <fstream> for file manipulation streams.", code: "#include <fstream>", preview: "Header included" },
+                { title: "Step 2: Writing Files (ofstream)", desc: "std::ofstream creates and writes file contents.", code: "std::ofstream file(\"data.txt\");\nfile << \"Hello File\";\nfile.close();", preview: "File written" },
+                { title: "Step 3: Reading Files (ifstream)", desc: "std::ifstream opens existing file for reading.", code: "std::ifstream file(\"data.txt\");", preview: "Stream opened" },
+                { title: "Step 4: Reading Line by Line", desc: "Loop using std::getline while file is valid.", code: "std::string line;\nwhile(std::getline(file, line)) {}", preview: "Content extracted" },
+                { title: "Step 5: Checking File Open", desc: "is_open() verifies if stream successfully opened.", code: "if(file.is_open()) {}", preview: "Verified open" },
+                { title: "Step 6: Exam", isQuiz: true, question: "🎯 Write C++ statement to close file stream object named file:", expectedAnswer: "file.close();", altAnswer: "file.close()" }
+            ]}
+        };
+
+        // 10 C++ QUEST COMPETITION QUESTIONS
+        const questQuestions = [
+            { q: "Q1. Write C++ code to print 'hello' using std::cout and std::endl:", ans: "std::cout << \"hello\" << std::endl;", alt: "std::cout<<\"hello\"<<std::endl;" },
+            { q: "Q2. Write C++ integer variable declaration named x equal to 10:", ans: "int x = 10;", alt: "int x=10;" },
+            { q: "Q3. Write C++ statement to take user input into variable age using std::cin:", ans: "std::cin >> age;", alt: "std::cin>>age;" },
+            { q: "Q4. Write C++ ternary statement returning 'Y' if x is equal to 5 else 'N':", ans: "x == 5 ? 'Y' : 'N';", alt: "x==5?'Y':'N';" },
+            { q: "Q5. Write standard C++ for loop header to iterate int i from 0 to less than 5:", ans: "for(int i=0; i<5; i++)", alt: "for (int i = 0; i < 5; i++)" },
+            { q: "Q6. Write C++ void function signature header named run with no parameters:", ans: "void run()", alt: "void run(void)" },
+            { q: "Q7. Write C++ statement to get total element count of vector v:", ans: "v.size();", alt: "v.size()" },
+            { q: "Q8. Write C++ pointer declaration named ptr storing address of int x:", ans: "int* ptr = &x;", alt: "int *ptr = &x;" },
+            { q: "Q9. Write C++ statement to create object obj of class Student:", ans: "Student obj;", alt: "Student obj" },
+            { q: "Q10. Write C++ statement to close file stream object named file:", ans: "file.close();", alt: "file.close()" }
+        ];
+
+        let currentLevel = 1;
+        let currentStepIndex = 0;
+        let unlockedLevels = [1];
+        let completedLevels = [];
+
+        // Quest State
+        let questIndex = 0;
+        let questPoints = 0;
+
+        // DOM Nodes
+        const levelsContainer = document.getElementById("levels-container");
+        const screenLevels = document.getElementById("screen-levels");
+        const screenLearning = document.getElementById("screen-learning");
+        const screenQuest = document.getElementById("screen-quest");
+        const screenResult = document.getElementById("screen-result");
+
+        function renderLevelsMenu() {
+            levelsContainer.innerHTML = "";
+            for(let i = 1; i <= 10; i++) {
+                const lvl = levelsData[i];
+                const isUnlocked = unlockedLevels.includes(i);
+                const isCompleted = completedLevels.includes(i);
+
+                const card = document.createElement("div");
+                card.className = `level-card ${isUnlocked ? '' : 'locked'}`;
+                card.onclick = () => startLevel(i);
+                card.innerHTML = `
+                    <div class="level-left">
+                        <div class="level-icon">C++</div>
+                        <div class="level-info"><h3>${lvl.title}</h3><p>${lvl.steps[0].title}</p></div>
+                    </div>
+                    <div class="badge-status">${isCompleted ? '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i>' : isUnlocked ? '<i class="fa-solid fa-play" style="color:#38bdf8;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+                `;
+                levelsContainer.appendChild(card);
+            }
+
+            // 11th CARD: QUEST COMPETITION
+            const isQuestUnlocked = completedLevels.length >= 10;
+            const questCard = document.createElement("div");
+            questCard.className = `level-card quest-card ${isQuestUnlocked ? '' : 'locked'}`;
+            questCard.onclick = () => startQuest();
+            questCard.innerHTML = `
+                <div class="level-left">
+                    <div class="level-icon" style="border-color:#38bdf8; color:#38bdf8;"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="level-info"><h3 style="color:#38bdf8;">C++ Quest Competition</h3><p>10 C++ Systems Programming Questions</p></div>
+                </div>
+                <div class="badge-status">${isQuestUnlocked ? '<i class="fa-solid fa-bolt" style="color:#38bdf8;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+            `;
+            levelsContainer.appendChild(questCard);
+        }
+
+        function startLevel(lvl) {
+            if(!unlockedLevels.includes(lvl)) return alert("🔒 Complete previous levels first!");
+            currentLevel = lvl; currentStepIndex = 0;
+            showScreen(screenLearning);
+            renderStep();
+        }
+
+        function renderStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            document.getElementById("step-indicator-text").textContent = `Step ${currentStepIndex + 1} of 6`;
+            document.getElementById("btn-prev").disabled = (currentStepIndex === 0);
+            const box = document.getElementById("step-display");
+
+            if (stepData.isQuiz) {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.question}</p><input type="text" id="quiz-input" class="quiz-input-box" placeholder="Type C++ code here..."><div id="quiz-feedback" class="feedback-text"></div>`;
+                document.getElementById("btn-next").innerHTML = `Verify & Unlock <i class="fa-solid fa-check-double"></i>`;
+            } else {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.desc}</p><div class="preview-grid"><div class="code-box"><div class="box-title"><i class="fa-solid fa-code"></i> C++ Source</div><code>${escapeHtml(stepData.code)}</code></div><div class="output-box"><div class="box-title"><i class="fa-solid fa-terminal"></i> Console Output</div><div class="render-area">${stepData.preview}</div></div></div>`;
+                document.getElementById("btn-next").innerHTML = `Next <i class="fa-solid fa-chevron-right"></i>`;
+            }
+        }
+
+        function nextStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            if (stepData.isQuiz) {
+                const userAns = document.getElementById("quiz-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+                const expAns = stepData.expectedAnswer.toLowerCase().replace(/\s+/g, ' ');
+                const altAns = stepData.altAnswer ? stepData.altAnswer.toLowerCase().replace(/\s+/g, ' ') : "";
+
+                const feedback = document.getElementById("quiz-feedback");
+                if (userAns === expAns || (altAns && userAns === altAns)) {
+                    feedback.className = "feedback-text success-text"; feedback.innerHTML = "✅ Correct! Level Unlocked!";
+                    if (!completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
+                    if (currentLevel < 10 && !unlockedLevels.includes(currentLevel + 1)) unlockedLevels.push(currentLevel + 1);
+                    setTimeout(() => { goBackToLevels(); }, 1000);
+                } else {
+                    feedback.className = "feedback-text error-text"; feedback.innerHTML = "❌ Incorrect! Check C++ syntax (e.g. quotes or semicolons).";
+                }
+            } else { if (currentStepIndex < 5) { currentStepIndex++; renderStep(); } }
+        }
+
+        function prevStep() { if (currentStepIndex > 0) { currentStepIndex--; renderStep(); } }
+
+        /* QUEST COMPETITION LOGIC */
+        function startQuest() {
+            if (completedLevels.length < 10) return alert("🔒 Complete all 10 Levels to unlock Quest Competition!");
+            questIndex = 0; questPoints = 0;
+            showScreen(screenQuest);
+            renderQuestQuestion();
+        }
+
+        function renderQuestQuestion() {
+            const qData = questQuestions[questIndex];
+            document.getElementById("quest-q-num").textContent = `Question ${questIndex + 1} of 10`;
+            
+            let currentPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            document.getElementById("quest-score-text").textContent = `Score: ${currentPct}%`;
+
+            document.getElementById("quest-display").innerHTML = `
+                <h3>${qData.q}</h3>
+                <input type="text" id="quest-input" class="quiz-input-box" placeholder="Type C++ code here...">
+            `;
+        }
+
+        function submitQuestAnswer() {
+            const qData = questQuestions[questIndex];
+            const userAns = document.getElementById("quest-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+            const expAns = qData.ans.toLowerCase().replace(/\s+/g, ' ');
+            const altAns = qData.alt ? qData.alt.toLowerCase().replace(/\s+/g, ' ') : "";
+
+            if (userAns === expAns || (altAns && userAns === altAns)) {
+                questPoints += 10;
+            } else {
+                questPoints = Math.max(0, questPoints - 5);
+            }
+
+            questIndex++;
+            if (questIndex < 10) {
+                renderQuestQuestion();
+            } else {
+                finishQuest();
+            }
+        }
+
+        function finishQuest() {
+            let finalPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            showScreen(screenResult);
+            document.getElementById("result-score-val").textContent = `${finalPct}%`;
+
+            if (finalPct >= 77) {
+                document.getElementById("result-title").textContent = "🎉 Congratulations!";
+                document.getElementById("result-desc").textContent = "You successfully passed the C++ Master Quest Competition!";
+                document.getElementById("btn-cert").style.display = "inline-flex";
+                confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
+            } else {
+                document.getElementById("result-title").textContent = "Nice Try!";
+                document.getElementById("result-desc").textContent = "You scored less than 77%. Try again to earn your C++ certificate!";
+                document.getElementById("btn-cert").style.display = "none";
+            }
+        }
+
+        /* CERTIFICATE GENERATION - UNIQUE C++ CYBER BLUE THEME */
+        function openCertModal() { document.getElementById("modal-cert").classList.add("active"); }
+        function closeCertModal() { document.getElementById("modal-cert").classList.remove("active"); }
+
+        function generateCertificate() {
+            const name = document.getElementById("user-name").value.trim();
+            const age = document.getElementById("user-age").value.trim();
+            if (!name || !age) return alert("Please enter both Name and Age!");
+
+            const canvas = document.getElementById("certCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Background Gradient (Cyber Dark Blue)
+            const bgGrad = ctx.createLinearGradient(0, 0, 800, 600);
+            bgGrad.addColorStop(0, "#030712");
+            bgGrad.addColorStop(0.5, "#0f172a");
+            bgGrad.addColorStop(1, "#020617");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Electric Blue Neon Borders
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 6;
+            ctx.strokeRect(25, 25, 750, 550);
+
+            ctx.strokeStyle = "#00599C";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(35, 35, 730, 530);
+
+            // C++ Logo Badge Box in Top Corner
+            ctx.fillStyle = "#00599C";
+            ctx.fillRect(70, 65, 55, 50);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 22px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("C++", 97, 100);
+
+            // Header Title
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 28px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("CERTIFICATE OF C++ MASTERY", 430, 95);
+
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "bold 18px Poppins, sans-serif";
+            ctx.fillText("SYSTEMS PROGRAMMING & OOP STANDARDS", 430, 130);
+
+            // Recipient Details
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "16px Poppins, sans-serif";
+            ctx.fillText("This certificate is officially presented to", 400, 220);
+
+            ctx.fillStyle = "#e0f2fe";
+            ctx.font = "bold 38px Poppins, sans-serif";
+            ctx.fillText(name.toUpperCase(), 400, 280);
+
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "15px Poppins, sans-serif";
+            ctx.fillText(`Age: ${age} | Mastered Pointers, Vectors, Classes, OOP & Streams`, 400, 330);
+
+            // Score & Verification
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "bold 18px Orbitron, sans-serif";
+            ctx.fillText(`FINAL SCORE: ${document.getElementById("result-score-val").textContent} (PASSED)`, 400, 420);
+
+            const dateStr = new Date().toLocaleDateString();
+            ctx.fillStyle = "#64748b";
+            ctx.font = "14px Poppins, sans-serif";
+            ctx.fillText(`Issued Date: ${dateStr} | C++ Master Certification`, 400, 470);
+
+            // Download Trigger
+            const imageURI = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `${name.replace(/\s+/g, '_')}_CPP_Master_Certificate.png`;
+            link.href = imageURI;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            closeCertModal();
+        }
+
+        function goBackToLevels() { showScreen(screenLevels); renderLevelsMenu(); }
+        function showScreen(screen) {
+            [screenLevels, screenLearning, screenQuest, screenResult].forEach(s => s.classList.remove("active"));
+            screen.classList.add("active");
+        }
+        function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+        renderLevelsMenu();
+    </script>
+</body>
+</html>

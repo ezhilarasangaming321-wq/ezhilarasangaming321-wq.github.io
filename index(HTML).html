@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Master - 10 Levels & Quest Competition</title>
+    <!-- Icons & Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library for Fireworks -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --glass-bg: rgba(22, 30, 46, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --metal-glow: #00f2fe;
+            --text-silver: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(0, 242, 254, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(79, 172, 254, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-silver);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glass-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-glass:hover:not(:disabled) {
+            border-color: var(--metal-glow);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-glass:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.3), rgba(79, 172, 254, 0.2));
+            border-color: rgba(0, 242, 254, 0.5);
+        }
+
+        header { margin-bottom: 25px; text-align: center; }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header h1 span { color: var(--metal-glow); -webkit-text-fill-color: var(--metal-glow); }
+
+        .screen { width: 100%; max-width: 720px; display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* LEVEL MENU */
+        .level-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .level-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--glass-border);
+        }
+
+        .level-card:hover:not(.locked) { border-color: var(--metal-glow); transform: translateY(-2px); }
+        .level-card.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.8); }
+        .level-card.quest-card { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15)); border-color: rgba(245, 158, 11, 0.5); }
+
+        .level-left { display: flex; align-items: center; gap: 14px; }
+
+        .level-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--metal-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--metal-glow);
+        }
+
+        .level-info h3 { font-size: 1rem; color: #fff; }
+        .level-info p { font-size: 0.8rem; color: #94a3b8; }
+
+        /* STEP SCREEN & QUEST SCREEN */
+        .step-container { padding: 24px; position: relative; }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+        }
+
+        .step-indicator { font-size: 0.85rem; color: var(--metal-glow); font-weight: 600; }
+
+        .quest-score-badge {
+            background: rgba(0, 242, 254, 0.15);
+            border: 1px solid var(--metal-glow);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            color: var(--metal-glow);
+            font-size: 0.85rem;
+        }
+
+        .step-content-box {
+            min-height: 240px;
+            background: rgba(10, 15, 26, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .step-content-box h3 { color: #00f2fe; margin-bottom: 10px; font-size: 1.1rem; }
+        .step-content-box p { font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 14px; }
+
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        @media (max-width: 550px) { .preview-grid { grid-template-columns: 1fr; } }
+
+        .code-box, .output-box {
+            background: #050811;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.82rem;
+        }
+
+        .box-title {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+        }
+
+        .code-box code { font-family: monospace; color: #38bdf8; white-space: pre-wrap; word-break: break-all; }
+        .output-box .render-area { background: #ffffff; color: #0f172a; padding: 10px; border-radius: 6px; min-height: 60px; font-family: sans-serif; overflow-x: auto; }
+
+        .navigation-btns { display: flex; justify-content: space-between; align-items: center; }
+
+        .quiz-input-box {
+            width: 100%;
+            background: #050811;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.95rem;
+            margin-top: 12px;
+            outline: none;
+        }
+
+        .feedback-text { margin-top: 12px; font-size: 0.9rem; font-weight: 600; }
+        .success-text { color: #4ade80; }
+        .error-text { color: #f87171; }
+
+        /* MODAL POPUP FOR CERTIFICATE */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-card {
+            background: #111827;
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-card h3 { color: var(--metal-glow); margin-bottom: 12px; }
+        .modal-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #050811;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HTML <span>MASTER</span></h1>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Complete 10-Level HTML Course & Quest</p>
+    </header>
+
+    <!-- 1. LEVEL MENU -->
+    <section class="screen active" id="screen-levels">
+        <div class="glass-box level-card-list" id="levels-container"></div>
+    </section>
+
+    <!-- 2. LEARNING SCREEN -->
+    <section class="screen" id="screen-learning">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Levels
+                </button>
+                <span class="step-indicator" id="step-indicator-text">Step 1 of 6</span>
+            </div>
+
+            <div class="step-content-box" id="step-display"></div>
+
+            <div class="navigation-btns">
+                <button class="btn-glass" id="btn-prev" onclick="prevStep()">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                <button class="btn-glass btn-primary" id="btn-next" onclick="nextStep()">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. QUEST COMPETITION SCREEN -->
+    <section class="screen" id="screen-quest">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Exit Quest
+                </button>
+                <span class="step-indicator" id="quest-q-num">Question 1 of 10</span>
+                <div class="quest-score-badge" id="quest-score-text">Score: 0%</div>
+            </div>
+
+            <div class="step-content-box" id="quest-display"></div>
+
+            <div class="navigation-btns" style="justify-content: flex-end;">
+                <button class="btn-glass btn-primary" id="btn-quest-submit" onclick="submitQuestAnswer()">
+                    Submit Answer <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. QUEST RESULT SCREEN -->
+    <section class="screen" id="screen-result">
+        <div class="glass-box step-container" style="text-align: center;">
+            <i class="fa-solid fa-trophy" style="font-size: 3.5rem; color: #f59e0b; margin-bottom: 12px;"></i>
+            <h2 style="color: #fff;" id="result-title">Congratulations!</h2>
+            <p style="margin: 10px 0; color: #94a3b8;" id="result-desc"></p>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--metal-glow); margin: 15px 0;" id="result-score-val">0%</div>
+
+            <button class="btn-glass btn-primary" id="btn-cert" onclick="openCertModal()" style="margin-top: 10px;">
+                <i class="fa-solid fa-download"></i> Download Certificate
+            </button>
+            <br><br>
+            <button class="btn-glass" onclick="goBackToLevels()">Back to Levels</button>
+        </div>
+    </section>
+
+    <!-- MODAL FOR USER DETAILS -->
+    <div class="modal-overlay" id="modal-cert">
+        <div class="modal-card">
+            <h3>Certificate Details</h3>
+            <label style="font-size: 0.8rem; color:#94a3b8;">Enter Your Full Name:</label>
+            <input type="text" id="user-name" placeholder="e.g. John Doe">
+            <label style="font-size: 0.8rem; color:#94a3b8;">Enter Your Age:</label>
+            <input type="number" id="user-age" placeholder="e.g. 16">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn-glass" onclick="closeCertModal()">Cancel</button>
+                <button class="btn-glass btn-primary" onclick="generateCertificate()">Generate & Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Canvas for Certificate Image Generation -->
+    <canvas id="certCanvas" width="800" height="600" style="display:none;"></canvas>
+
+    <script>
+        const levelsData = {
+            1: { title: "Level 1: Basic Structure & Text", steps: [
+                { title: "Step 1: Heading 1 Tag", desc: "The <h1> tag defines the largest main title.", code: "<h1>Main Title</h1>", preview: "<h1>Main Title</h1>" },
+                { title: "Step 2: Sub-headings", desc: "Headings go from <h2> to <h6>.", code: "<h2>Heading 2</h2>", preview: "<h2>Heading 2</h2>" },
+                { title: "Step 3: Paragraph Tag", desc: "The <p> tag defines paragraphs.", code: "<p>Paragraph text.</p>", preview: "<p>Paragraph text.</p>" },
+                { title: "Step 4: Line Break Tag", desc: "The <br> tag inserts line breaks.", code: "Line 1<br>Line 2", preview: "Line 1<br>Line 2" },
+                { title: "Step 5: Bold Text", desc: "Use <b> for bold text.", code: "<b>Bold text</b>", preview: "<b>Bold text</b>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write an HTML code using the &lt;h1&gt; tag that displays 'Hello':", expectedAnswer: "<h1>hello</h1>" }
+            ]},
+            2: { title: "Level 2: Links & Lists", steps: [
+                { title: "Step 1: Hyperlinks", desc: "The <a> tag creates links.", code: '<a href="#">Link</a>', preview: '<a href="#">Link</a>' },
+                { title: "Step 2: Unordered List", desc: "The <ul> tag creates bulleted lists.", code: "<ul><li>Item</li></ul>", preview: "<ul><li>Item</li></ul>" },
+                { title: "Step 3: Ordered List", desc: "The <ol> tag creates numbered lists.", code: "<ol><li>Item</li></ol>", preview: "<ol><li>Item</li></ol>" },
+                { title: "Step 4: Image Tag", desc: "The <img> tag embeds images.", code: '<img src="https://via.placeholder.com/50">', preview: '<img src="https://via.placeholder.com/50">' },
+                { title: "Step 5: Horizontal Rule", desc: "The <hr> tag creates line breaks.", code: "A<hr>B", preview: "A<hr>B" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write an HTML link using the &lt;a&gt; tag with text 'Home':", expectedAnswer: "<a>home</a>", altAnswer: '<a href="#">home</a>' }
+            ]},
+            3: { title: "Level 3: Containers", steps: [{ title: "Step 1", desc: "Div block container", code: "<div>Box</div>", preview: "<div>Box</div>" }, { title: "Step 2", desc: "Span container", code: "<span>Span</span>", preview: "<span>Span</span>" }, { title: "Step 3", desc: "Blockquote", code: "<blockquote>Quote</blockquote>", preview: "<blockquote>Quote</blockquote>" }, { title: "Step 4", desc: "Pre text", code: "<pre>Pre</pre>", preview: "<pre>Pre</pre>" }, { title: "Step 5", desc: "Code tag", code: "<code>Code</code>", preview: "<code>Code</code>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write a container using &lt;div&gt; with text 'Box':", expectedAnswer: "<div>box</div>" }]},
+            4: { title: "Level 4: Tables", steps: [{ title: "Step 1", desc: "Table tag", code: "<table></table>", preview: "<table></table>" }, { title: "Step 2", desc: "Row tag", code: "<tr></tr>", preview: "<tr></tr>" }, { title: "Step 3", desc: "Header cell", code: "<th>Head</th>", preview: "<th>Head</th>" }, { title: "Step 4", desc: "Data cell", code: "<td>Data</td>", preview: "<td>Data</td>" }, { title: "Step 5", desc: "Complete Table", code: "<table><tr><td>1</td></tr></table>", preview: "<table><tr><td>1</td></tr></table>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write header cell using &lt;th&gt; with text 'Header':", expectedAnswer: "<th>header</th>" }]},
+            5: { title: "Level 5: Forms", steps: [{ title: "Step 1", desc: "Form tag", code: "<form></form>", preview: "<form></form>" }, { title: "Step 2", desc: "Input text", code: "<input type='text'>", preview: "<input type='text'>" }, { title: "Step 3", desc: "Input password", code: "<input type='password'>", preview: "<input type='password'>" }, { title: "Step 4", desc: "Checkbox", code: "<input type='checkbox'>", preview: "<input type='checkbox'>" }, { title: "Step 5", desc: "Button", code: "<button>Btn</button>", preview: "<button>Btn</button>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write button using &lt;button&gt; with text 'Send':", expectedAnswer: "<button>send</button>" }]},
+            6: { title: "Level 6: Advanced Forms", steps: [{ title: "Step 1", desc: "Radio", code: "<input type='radio'>", preview: "<input type='radio'>" }, { title: "Step 2", desc: "Select", code: "<select></select>", preview: "<select></select>" }, { title: "Step 3", desc: "Textarea", code: "<textarea></textarea>", preview: "<textarea></textarea>" }, { title: "Step 4", desc: "Label", code: "<label>L</label>", preview: "<label>L</label>" }, { title: "Step 5", desc: "Fieldset", code: "<fieldset></fieldset>", preview: "<fieldset></fieldset>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write dropdown option using &lt;option&gt; with text 'Yes':", expectedAnswer: "<option>yes</option>" }]},
+            7: { title: "Level 7: HTML5 Layouts", steps: [{ title: "Step 1", desc: "Header tag", code: "<header></header>", preview: "<header></header>" }, { title: "Step 2", desc: "Nav tag", code: "<nav></nav>", preview: "<nav></nav>" }, { title: "Step 3", desc: "Main", code: "<main></main>", preview: "<main></main>" }, { title: "Step 4", desc: "Aside", code: "<aside></aside>", preview: "<aside></aside>" }, { title: "Step 5", desc: "Footer", code: "<footer></footer>", preview: "<footer></footer>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write footer using &lt;footer&gt; with text 'End':", expectedAnswer: "<footer>end</footer>" }]},
+            8: { title: "Level 8: Media", steps: [{ title: "Step 1", desc: "Audio", code: "<audio></audio>", preview: "<audio></audio>" }, { title: "Step 2", desc: "Video", code: "<video></video>", preview: "<video></video>" }, { title: "Step 3", desc: "Figcaption", code: "<figcaption></figcaption>", preview: "<figcaption></figcaption>" }, { title: "Step 4", desc: "Iframe", code: "<iframe></iframe>", preview: "<iframe></iframe>" }, { title: "Step 5", desc: "Picture", code: "<picture></picture>", preview: "<picture></picture>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write image caption using &lt;figcaption&gt; with text 'Photo':", expectedAnswer: "<figcaption>photo</figcaption>" }]},
+            9: { title: "Level 9: HTML5 Special Inputs", steps: [{ title: "Step 1", desc: "Date", code: "<input type='date'>", preview: "<input type='date'>" }, { title: "Step 2", desc: "Color", code: "<input type='color'>", preview: "<input type='color'>" }, { title: "Step 3", desc: "Range", code: "<input type='range'>", preview: "<input type='range'>" }, { title: "Step 4", desc: "Number", code: "<input type='number'>", preview: "<input type='number'>" }, { title: "Step 5", desc: "Progress", code: "<progress></progress>", preview: "<progress></progress>" }, { title: "Step 6: Test", isQuiz: true, question: "🎯 Write date input using &lt;input&gt; with type='date':", expectedAnswer: '<input type="date">', altAnswer: "<input type='date'>" }]},
+            10: { title: "Level 10: Interactive Tags", steps: [{ title: "Step 1", desc: "Details", code: "<details></details>", preview: "<details></details>" }, { title: "Step 2", desc: "Datalist", code: "<datalist></datalist>", preview: "<datalist></datalist>" }, { title: "Step 3", desc: "Dialog", code: "<dialog></dialog>", preview: "<dialog></dialog>" }, { title: "Step 4", desc: "Meter", code: "<meter></meter>", preview: "<meter></meter>" }, { title: "Step 5", desc: "Mark", code: "<mark></mark>", preview: "<mark></mark>" }, { title: "Step 6: Exam", isQuiz: true, question: "🎯 Write details heading using &lt;summary&gt; with text 'Info':", expectedAnswer: "<summary>info</summary>" }]}
+        };
+
+        // 10 QUEST COMPETITION QUESTIONS
+        const questQuestions = [
+            { q: "Q1. Write an HTML main heading using &lt;h1&gt; with text 'Master':", ans: "<h1>master</h1>" },
+            { q: "Q2. Write a clickable link using &lt;a&gt; tag with text 'Click':", ans: "<a>click</a>", alt: '<a href="#">click</a>' },
+            { q: "Q3. Write a block container using &lt;div&gt; with text 'Content':", ans: "<div>content</div>" },
+            { q: "Q4. Write a table data cell using &lt;td&gt; with text 'Score':", ans: "<td>score</td>" },
+            { q: "Q5. Write a submit button using &lt;button&gt; with text 'Submit':", ans: "<button>submit</button>" },
+            { q: "Q6. Write a dropdown selection option using &lt;option&gt; with text 'HTML':", ans: "<option>html</option>" },
+            { q: "Q7. Write a semantic layout header using &lt;header&gt; with text 'Top':", ans: "<header>top</header>" },
+            { q: "Q8. Write an image caption using &lt;figcaption&gt; with text 'Image':", ans: "<figcaption>image</figcaption>" },
+            { q: "Q9. Write a date picker input using &lt;input&gt; with type='date':", ans: '<input type="date">', alt: "<input type='date'>" },
+            { q: "Q10. Write an accordion summary using &lt;summary&gt; with text 'Details':", ans: "<summary>details</summary>" }
+        ];
+
+        let currentLevel = 1;
+        let currentStepIndex = 0;
+        let unlockedLevels = [1];
+        let completedLevels = [];
+
+        // Quest State
+        let questIndex = 0;
+        let questPoints = 0; // Each right = +10, wrong = -5
+
+        // DOM Nodes
+        const levelsContainer = document.getElementById("levels-container");
+        const screenLevels = document.getElementById("screen-levels");
+        const screenLearning = document.getElementById("screen-learning");
+        const screenQuest = document.getElementById("screen-quest");
+        const screenResult = document.getElementById("screen-result");
+
+        function renderLevelsMenu() {
+            levelsContainer.innerHTML = "";
+            for(let i = 1; i <= 10; i++) {
+                const lvl = levelsData[i];
+                const isUnlocked = unlockedLevels.includes(i);
+                const isCompleted = completedLevels.includes(i);
+
+                const card = document.createElement("div");
+                card.className = `level-card ${isUnlocked ? '' : 'locked'}`;
+                card.onclick = () => startLevel(i);
+                card.innerHTML = `
+                    <div class="level-left">
+                        <div class="level-icon"><i class="fa-solid fa-${i}"></i></div>
+                        <div class="level-info"><h3>${lvl.title}</h3><p>${lvl.steps[0].title}</p></div>
+                    </div>
+                    <div class="badge-status">${isCompleted ? '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i>' : isUnlocked ? '<i class="fa-solid fa-play" style="color:#00f2fe;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+                `;
+                levelsContainer.appendChild(card);
+            }
+
+            // 11th CARD: QUEST COMPETITION
+            const isQuestUnlocked = completedLevels.length >= 10;
+            const questCard = document.createElement("div");
+            questCard.className = `level-card quest-card ${isQuestUnlocked ? '' : 'locked'}`;
+            questCard.onclick = () => startQuest();
+            questCard.innerHTML = `
+                <div class="level-left">
+                    <div class="level-icon" style="border-color:#f59e0b; color:#f59e0b;"><i class="fa-solid fa-trophy"></i></div>
+                    <div class="level-info"><h3 style="color:#f59e0b;">Quest Competition</h3><p>10 Grand Questions Exam</p></div>
+                </div>
+                <div class="badge-status">${isQuestUnlocked ? '<i class="fa-solid fa-fire" style="color:#f59e0b;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+            `;
+            levelsContainer.appendChild(questCard);
+        }
+
+        function startLevel(lvl) {
+            if(!unlockedLevels.includes(lvl)) return alert("🔒 Complete previous levels first!");
+            currentLevel = lvl; currentStepIndex = 0;
+            showScreen(screenLearning);
+            renderStep();
+        }
+
+        function renderStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            document.getElementById("step-indicator-text").textContent = `Step ${currentStepIndex + 1} of 6`;
+            document.getElementById("btn-prev").disabled = (currentStepIndex === 0);
+            const box = document.getElementById("step-display");
+
+            if (stepData.isQuiz) {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.question}</p><input type="text" id="quiz-input" class="quiz-input-box" placeholder="Type tag here..."><div id="quiz-feedback" class="feedback-text"></div>`;
+                document.getElementById("btn-next").innerHTML = `Verify & Unlock <i class="fa-solid fa-check-double"></i>`;
+            } else {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.desc}</p><div class="preview-grid"><div class="code-box"><div class="box-title"><i class="fa-solid fa-code"></i> Code</div><code>${escapeHtml(stepData.code)}</code></div><div class="output-box"><div class="box-title"><i class="fa-solid fa-eye"></i> Preview</div><div class="render-area">${stepData.preview}</div></div></div>`;
+                document.getElementById("btn-next").innerHTML = `Next <i class="fa-solid fa-chevron-right"></i>`;
+            }
+        }
+
+        function nextStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            if (stepData.isQuiz) {
+                const userAns = document.getElementById("quiz-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+                const feedback = document.getElementById("quiz-feedback");
+                if (userAns === stepData.expectedAnswer || (stepData.altAnswer && userAns === stepData.altAnswer)) {
+                    feedback.className = "feedback-text success-text"; feedback.innerHTML = "✅ Correct! Level Unlocked!";
+                    if (!completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
+                    if (currentLevel < 10 && !unlockedLevels.includes(currentLevel + 1)) unlockedLevels.push(currentLevel + 1);
+                    setTimeout(() => { goBackToLevels(); }, 1000);
+                } else {
+                    feedback.className = "feedback-text error-text"; feedback.innerHTML = "❌ Incorrect! Check HTML syntax and try again.";
+                }
+            } else { if (currentStepIndex < 5) { currentStepIndex++; renderStep(); } }
+        }
+
+        function prevStep() { if (currentStepIndex > 0) { currentStepIndex--; renderStep(); } }
+
+        /* QUEST COMPETITION LOGIC */
+        function startQuest() {
+            if (completedLevels.length < 10) return alert("🔒 Complete all 10 Levels to unlock Quest Competition!");
+            questIndex = 0; questPoints = 0;
+            showScreen(screenQuest);
+            renderQuestQuestion();
+        }
+
+        function renderQuestQuestion() {
+            const qData = questQuestions[questIndex];
+            document.getElementById("quest-q-num").textContent = `Question ${questIndex + 1} of 10`;
+            
+            // Calculate percentage score
+            let currentPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            document.getElementById("quest-score-text").textContent = `Score: ${currentPct}%`;
+
+            document.getElementById("quest-display").innerHTML = `
+                <h3>${qData.q}</h3>
+                <input type="text" id="quest-input" class="quiz-input-box" placeholder="Type tag code here...">
+            `;
+        }
+
+        function submitQuestAnswer() {
+            const qData = questQuestions[questIndex];
+            const userAns = document.getElementById("quest-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+
+            if (userAns === qData.ans || (qData.alt && userAns === qData.alt)) {
+                questPoints += 10;
+            } else {
+                questPoints = Math.max(0, questPoints - 5);
+            }
+
+            questIndex++;
+            if (questIndex < 10) {
+                renderQuestQuestion();
+            } else {
+                finishQuest();
+            }
+        }
+
+        function finishQuest() {
+            let finalPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            showScreen(screenResult);
+            document.getElementById("result-score-val").textContent = `${finalPct}%`;
+
+            if (finalPct >= 77) {
+                document.getElementById("result-title").textContent = "🎉 Congratulations!";
+                document.getElementById("result-desc").textContent = "You successfully passed the HTML Master Quest Competition!";
+                document.getElementById("btn-cert").style.display = "inline-flex";
+                // Trigger Confetti Celebration
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            } else {
+                document.getElementById("result-title").textContent = "Nice Try!";
+                document.getElementById("result-desc").textContent = "You scored less than 77%. Try again to earn your certificate!";
+                document.getElementById("btn-cert").style.display = "none";
+            }
+        }
+
+        /* CERTIFICATE & MODAL */
+        function openCertModal() { document.getElementById("modal-cert").classList.add("active"); }
+        function closeCertModal() { document.getElementById("modal-cert").classList.remove("active"); }
+
+        function generateCertificate() {
+            const name = document.getElementById("user-name").value.trim();
+            const age = document.getElementById("user-age").value.trim();
+            if (!name || !age) return alert("Please enter both Name and Age!");
+
+            const canvas = document.getElementById("certCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Background
+            ctx.fillStyle = "#090d16";
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Metallic Border
+            ctx.strokeStyle = "#00f2fe";
+            ctx.lineWidth = 10;
+            ctx.strokeRect(20, 20, 760, 560);
+
+            // Title
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 32px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("CERTIFICATE OF ACHIEVEMENT", 400, 100);
+
+            ctx.fillStyle = "#00f2fe";
+            ctx.font = "20px Poppins, sans-serif";
+            ctx.fillText("HTML MASTER COURSE & QUEST", 400, 140);
+
+            // Recipient
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "18px Poppins, sans-serif";
+            ctx.fillText("This is proudly presented to", 400, 230);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 36px Poppins, sans-serif";
+            ctx.fillText(name.toUpperCase(), 400, 290);
+
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "16px Poppins, sans-serif";
+            ctx.fillText(`Age: ${age} | Successfully Cleared HTML Master Quest Competition`, 400, 340);
+
+            // Date & Badge
+            const dateStr = new Date().toLocaleDateString();
+            ctx.fillStyle = "#00f2fe";
+            ctx.font = "bold 16px Orbitron, sans-serif";
+            ctx.fillText(`VERIFIED GRADE: PASSED (${document.getElementById("result-score-val").textContent})`, 400, 430);
+
+            ctx.fillStyle = "#64748b";
+            ctx.font = "14px Poppins, sans-serif";
+            ctx.fillText(`Issued Date: ${dateStr}`, 400, 480);
+
+            // Download Trigger
+            const imageURI = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `${name.replace(/\s+/g, '_')}_HTML_Master_Certificate.png`;
+            link.href = imageURI;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            closeCertModal();
+        }
+
+        function goBackToLevels() { showScreen(screenLevels); renderLevelsMenu(); }
+        function showScreen(screen) {
+            [screenLevels, screenLearning, screenQuest, screenResult].forEach(s => s.classList.remove("active"));
+            screen.classList.add("active");
+        }
+        function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+        renderLevelsMenu();
+    </script>
+</body>
+</html>

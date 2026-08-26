@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Master - 10 Levels & Quest Competition</title>
+    <!-- Icons & Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a02;
+            --glass-bg: rgba(26, 24, 10, 0.75);
+            --glass-border: rgba(247, 223, 30, 0.25);
+            --js-yellow: #f7df1e;
+            --js-amber: #f59e0b;
+            --text-silver: #fef08a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(247, 223, 30, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glass-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-glass:hover:not(:disabled) {
+            border-color: var(--js-yellow);
+            box-shadow: 0 0 15px rgba(247, 223, 30, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-glass:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(247, 223, 30, 0.25), rgba(245, 158, 11, 0.25));
+            border-color: rgba(247, 223, 30, 0.5);
+            color: #fef08a;
+        }
+
+        header { margin-bottom: 25px; text-align: center; }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            background: linear-gradient(180deg, #ffffff 0%, #fef08a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header h1 span { color: var(--js-yellow); -webkit-text-fill-color: var(--js-yellow); }
+
+        .screen { width: 100%; max-width: 720px; display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* LEVEL MENU */
+        .level-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .level-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(42, 38, 12, 0.3);
+            border: 1px solid var(--glass-border);
+        }
+
+        .level-card:hover:not(.locked) { border-color: var(--js-yellow); transform: translateY(-2px); }
+        .level-card.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.8); }
+        .level-card.quest-card { 
+            background: linear-gradient(135deg, rgba(247, 223, 30, 0.2), rgba(245, 158, 11, 0.2)); 
+            border-color: rgba(247, 223, 30, 0.6); 
+        }
+
+        .level-left { display: flex; align-items: center; gap: 14px; }
+
+        .level-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(247, 223, 30, 0.1);
+            border: 1px solid var(--js-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--js-yellow);
+            font-weight: bold;
+        }
+
+        .level-info h3 { font-size: 1rem; color: #fff; }
+        .level-info p { font-size: 0.8rem; color: #a1a1aa; }
+
+        /* STEP & QUEST SCREENS */
+        .step-container { padding: 24px; position: relative; }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+        }
+
+        .step-indicator { font-size: 0.85rem; color: var(--js-yellow); font-weight: 600; }
+
+        .quest-score-badge {
+            background: rgba(247, 223, 30, 0.15);
+            border: 1px solid var(--js-yellow);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            color: var(--js-yellow);
+            font-size: 0.85rem;
+        }
+
+        .step-content-box {
+            min-height: 240px;
+            background: rgba(12, 11, 4, 0.85);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .step-content-box h3 { color: var(--js-yellow); margin-bottom: 10px; font-size: 1.1rem; }
+        .step-content-box p { font-size: 0.9rem; line-height: 1.5; color: #d4d4d8; margin-bottom: 14px; }
+
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        @media (max-width: 550px) { .preview-grid { grid-template-columns: 1fr; } }
+
+        .code-box, .output-box {
+            background: #000000;
+            border: 1px solid rgba(247, 223, 30, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.82rem;
+        }
+
+        .box-title {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #a1a1aa; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+        }
+
+        .code-box code { font-family: 'Fira Code', monospace; color: #fef08a; white-space: pre-wrap; word-break: break-all; }
+        .output-box .render-area { background: #09090b; color: #f7df1e; padding: 10px; border-radius: 6px; min-height: 60px; font-family: 'Fira Code', monospace; overflow-x: auto; }
+
+        .navigation-btns { display: flex; justify-content: space-between; align-items: center; }
+
+        .quiz-input-box {
+            width: 100%;
+            background: #000000;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            margin-top: 12px;
+            outline: none;
+        }
+
+        .feedback-text { margin-top: 12px; font-size: 0.9rem; font-weight: 600; }
+        .success-text { color: #4ade80; }
+        .error-text { color: #f87171; }
+
+        /* MODAL POPUP FOR CERTIFICATE */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-card {
+            background: #1c1917;
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-card h3 { color: var(--js-yellow); margin-bottom: 12px; }
+        .modal-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #000000;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>JAVASCRIPT <span>MASTER</span></h1>
+        <p style="font-size: 0.85rem; color: #a1a1aa; margin-top: 4px;">Complete 10-Level Modern JS Course & Quest</p>
+    </header>
+
+    <!-- 1. LEVEL MENU -->
+    <section class="screen active" id="screen-levels">
+        <div class="glass-box level-card-list" id="levels-container"></div>
+    </section>
+
+    <!-- 2. LEARNING SCREEN -->
+    <section class="screen" id="screen-learning">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Levels
+                </button>
+                <span class="step-indicator" id="step-indicator-text">Step 1 of 6</span>
+            </div>
+
+            <div class="step-content-box" id="step-display"></div>
+
+            <div class="navigation-btns">
+                <button class="btn-glass" id="btn-prev" onclick="prevStep()">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                <button class="btn-glass btn-primary" id="btn-next" onclick="nextStep()">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. QUEST COMPETITION SCREEN -->
+    <section class="screen" id="screen-quest">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Exit Quest
+                </button>
+                <span class="step-indicator" id="quest-q-num">Question 1 of 10</span>
+                <div class="quest-score-badge" id="quest-score-text">Score: 0%</div>
+            </div>
+
+            <div class="step-content-box" id="quest-display"></div>
+
+            <div class="navigation-btns" style="justify-content: flex-end;">
+                <button class="btn-glass btn-primary" id="btn-quest-submit" onclick="submitQuestAnswer()">
+                    Submit Answer <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. QUEST RESULT SCREEN -->
+    <section class="screen" id="screen-result">
+        <div class="glass-box step-container" style="text-align: center;">
+            <i class="fa-brands fa-js" style="font-size: 3.5rem; color: #f7df1e; margin-bottom: 12px;"></i>
+            <h2 style="color: #fff;" id="result-title">Congratulations!</h2>
+            <p style="margin: 10px 0; color: #a1a1aa;" id="result-desc"></p>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--js-yellow); margin: 15px 0;" id="result-score-val">0%</div>
+
+            <button class="btn-glass btn-primary" id="btn-cert" onclick="openCertModal()" style="margin-top: 10px;">
+                <i class="fa-solid fa-download"></i> Download JS Certificate
+            </button>
+            <br><br>
+            <button class="btn-glass" onclick="goBackToLevels()">Back to Levels</button>
+        </div>
+    </section>
+
+    <!-- MODAL FOR USER DETAILS -->
+    <div class="modal-overlay" id="modal-cert">
+        <div class="modal-card">
+            <h3>JavaScript Master Certificate Details</h3>
+            <label style="font-size: 0.8rem; color:#a1a1aa;">Enter Your Full Name:</label>
+            <input type="text" id="user-name" placeholder="e.g. Brendan Eich">
+            <label style="font-size: 0.8rem; color:#a1a1aa;">Enter Your Age:</label>
+            <input type="number" id="user-age" placeholder="e.g. 18">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn-glass" onclick="closeCertModal()">Cancel</button>
+                <button class="btn-glass btn-primary" onclick="generateCertificate()">Generate & Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Canvas for Certificate Image Generation -->
+    <canvas id="certCanvas" width="800" height="600" style="display:none;"></canvas>
+
+    <script>
+        const levelsData = {
+            1: { title: "Level 1: Console Output (console.log)", steps: [
+                { title: "Step 1: Logging Text", desc: "console.log() prints message to dev tools console.", code: "console.log('Hello JS');", preview: "Hello JS" },
+                { title: "Step 2: Logging Numbers", desc: "You can directly print numbers or math.", code: "console.log(100);", preview: "100" },
+                { title: "Step 3: Strings with Quotes", desc: "Strings can use single or double quotes.", code: "console.log(\"Web Dev\");", preview: "Web Dev" },
+                { title: "Step 4: Multiple Values", desc: "Separate multiple values with comma.", code: "console.log('Score:', 50);", preview: "Score: 50" },
+                { title: "Step 5: Browser Alert", desc: "alert() pops up a dialog message.", code: "alert('Welcome!');", preview: "Popup Alert active" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write JS statement to log 'Hello' using console.log:", expectedAnswer: "console.log('hello');", altAnswer: "console.log(\"hello\");" }
+            ]},
+            2: { title: "Level 2: Variables (let & const)", steps: [
+                { title: "Step 1: Reassignable let", desc: "let declares variable that can change later.", code: "let age = 18;\nage = 19;", preview: "19" },
+                { title: "Step 2: Constant const", desc: "const declares variable that cannot be reassigned.", code: "const pi = 3.14;", preview: "3.14" },
+                { title: "Step 3: Legacy var", desc: "var is older way to declare variables.", code: "var city = 'Chennai';", preview: "Chennai" },
+                { title: "Step 4: String Interpolation", desc: "Template literals using backticks ``.", code: "let name = 'Alex';\n`Hi ${name}`;", preview: "Hi Alex" },
+                { title: "Step 5: Undefined vs Null", desc: "empty vs explicitly assigned no-value.", code: "let x; // undefined\nlet y = null;", preview: "undefined / null" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write JS constant variable declaration for x equal to 10:", expectedAnswer: "const x = 10;", altAnswer: "const x=10;" }
+            ]},
+            3: { title: "Level 3: Functions & Arrow Functions", steps: [
+                { title: "Step 1: Standard Function", desc: "function keyword creates reusable logic block.", code: "function greet() {\n  return 'Hi';\n}", preview: "Hi" },
+                { title: "Step 2: Function Parameters", desc: "Pass data into function arguments.", code: "function add(a, b) {\n  return a + b;\n}", preview: "Sum returned" },
+                { title: "Step 3: ES6 Arrow Function", desc: "Modern short syntax for functions.", code: "const multiply = (a, b) => a * b;", preview: "Product returned" },
+                { title: "Step 4: One-liner Arrow", desc: "Implicit return for single expressions.", code: "const square = x => x * x;", preview: "Square value" },
+                { title: "Step 5: Calling Function", desc: "Invoke by adding () after function name.", code: "square(4);", preview: "16" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write arrow function syntax assigned to const run that returns 'ok':", expectedAnswer: "const run = () => 'ok';", altAnswer: "const run=()=>'ok';" }
+            ]},
+            4: { title: "Level 4: Conditionals (if-else & Ternary)", steps: [
+                { title: "Step 1: If-Else Check", desc: "Executes code block based on truthiness.", code: "if (age >= 18) {\n  console.log('Adult');\n}", preview: "Adult" },
+                { title: "Step 2: Strict Equality (===)", desc: "Checks both value and data type.", code: "if (x === '5') // false for number 5", preview: "Strict check" },
+                { title: "Step 3: Else-If Condition", desc: "Chain multiple alternative checks.", code: "if(a) {} else if(b) {}", preview: "Branch evaluated" },
+                { title: "Step 4: Ternary Operator", desc: "Short 1-line if-else: condition ? true : false", code: "let status = isWin ? 'Pass' : 'Fail';", preview: "Pass" },
+                { title: "Step 5: Logical Operators", desc: "&& (AND), || (OR), ! (NOT)", code: "if (a && b) console.log('Both');", preview: "Both" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write JS ternary statement checking if x is equal to 5 return 'yes' else 'no':", expectedAnswer: "x === 5 ? 'yes' : 'no';", altAnswer: "x==5?'yes':'no';" }
+            ]},
+            5: { title: "Level 5: Loops (for, while, forOf)", steps: [
+                { title: "Step 1: For Loop", desc: "Repeat code fixed number of times.", code: "for(let i=0; i<3; i++) {\n  console.log(i);\n}", preview: "0, 1, 2" },
+                { title: "Step 2: While Loop", desc: "Runs while condition stays true.", code: "while(n < 3) {\n  n++;\n}", preview: "Loop completed" },
+                { title: "Step 3: for...of Loop", desc: "Iterates over iterable items like Arrays.", code: "for(let item of arr) {\n  console.log(item);\n}", preview: "Items printed" },
+                { title: "Step 4: Break & Continue", desc: "Break exits loop; Continue skips step.", code: "if(i === 2) break;", preview: "Loop broken" },
+                { title: "Step 5: Array forEach", desc: "High order loop for array items.", code: "items.forEach(x => console.log(x));", preview: "Iterated" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write standard for loop header to iterate i from 0 to less than 5:", expectedAnswer: "for(let i=0; i<5; i++)", altAnswer: "for (let i = 0; i < 5; i++)" }
+            ]},
+            6: { title: "Level 6: Arrays & Modern Methods", steps: [
+                { title: "Step 1: Array Creation", desc: "List of ordered values inside [] brackets.", code: "const nums = [10, 20, 30];", preview: "[10, 20, 30]" },
+                { title: "Step 2: Push & Pop", desc: "push adds to end, pop removes from end.", code: "nums.push(40);\nnums.pop();", preview: "[10, 20, 30]" },
+                { title: "Step 3: Map Method", desc: "Creates new array by transforming each element.", code: "[1, 2].map(x => x * 2);", preview: "[2, 4]" },
+                { title: "Step 4: Filter Method", desc: "Filters elements matching condition.", code: "[10, 25].filter(x => x > 20);", preview: "[25]" },
+                { title: "Step 5: Array Destructuring", desc: "Unpack values into distinct variables.", code: "const [first, second] = nums;", preview: "10, 20" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write JS expression to get length of array arr:", expectedAnswer: "arr.length;", altAnswer: "arr.length" }
+            ]},
+            7: { title: "Level 7: Objects & JSON", steps: [
+                { title: "Step 1: Object Literals", desc: "Key-value pairs stored inside {} braces.", code: "const user = { name: 'John', age: 20 };", preview: "{ name, age }" },
+                { title: "Step 2: Dot Notation", desc: "Access properties using dot.", code: "console.log(user.name);", preview: "John" },
+                { title: "Step 3: Object Methods", desc: "Functions stored as object properties.", code: "user.greet = () => 'Hello';", preview: "Method added" },
+                { title: "Step 4: Object Destructuring", desc: "Extract properties directly into variables.", code: "const { name, age } = user;", preview: "John, 20" },
+                { title: "Step 5: JSON stringify", desc: "Convert JS object to JSON string.", code: "JSON.stringify(user);", preview: '{"name":"John"}' },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write JS code to access property 'age' from object obj:", expectedAnswer: "obj.age;", altAnswer: "obj['age'];" }
+            ]},
+            8: { title: "Level 8: DOM Manipulation", steps: [
+                { title: "Step 1: querySelector", desc: "Find element using CSS selector.", code: "const btn = document.querySelector('#btn');", preview: "Element selected" },
+                { title: "Step 2: textContent", desc: "Change inner text of element.", code: "btn.textContent = 'Clicked!';", preview: "Text updated" },
+                { title: "Step 3: Event Listeners", desc: "Attach action to user interaction.", code: "btn.addEventListener('click', () => {});", preview: "Listener active" },
+                { title: "Step 4: Styling via JS", desc: "Modify CSS inline styles directly.", code: "btn.style.color = 'yellow';", preview: "Style applied" },
+                { title: "Step 5: classList Toggle", desc: "Add/remove CSS classes dynamically.", code: "btn.classList.add('active');", preview: "Class added" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write JS method to select element with id 'app' using querySelector:", expectedAnswer: "document.querySelector('#app');", altAnswer: "document.querySelector(\"#app\");" }
+            ]},
+            9: { title: "Level 9: ES6+ Spread & Rest Operators", steps: [
+                { title: "Step 1: Spread Array", desc: "Unpack array elements into new array.", code: "const newArr = [...arr, 4];", preview: "[1, 2, 3, 4]" },
+                { title: "Step 2: Spread Object", desc: "Merge properties from objects.", code: "const newObj = { ...user, role: 'admin' };", preview: "Object merged" },
+                { title: "Step 3: Rest Parameter", desc: "Collect multiple arguments into array.", code: "function sum(...nums) {}", preview: "Rest parameter" },
+                { title: "Step 4: Optional Chaining (?.)", desc: "Safely access deeply nested properties.", code: "user?.address?.city;", preview: "Safe access" },
+                { title: "Step 5: Nullish Coalescing (??)", desc: "Fallback default value for null/undefined.", code: "const name = userName ?? 'Guest';", preview: "Guest" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write array spread expression to clone array arr:", expectedAnswer: "[...arr];", altAnswer: "[...arr]" }
+            ]},
+            10: { title: "Level 10: Async / Await & Fetch API", steps: [
+                { title: "Step 1: Promises", desc: "Represents eventual completion of async action.", code: "const p = new Promise((res) => res('Done'));", preview: "Promise resolved" },
+                { title: "Step 2: Async Functions", desc: "Async keyword allows using await inside function.", code: "async function getData() {}", preview: "Async function" },
+                { title: "Step 3: Await Keyword", desc: "Pauses execution until Promise settles.", code: "const res = await fetch(url);", preview: "Response fetched" },
+                { title: "Step 4: Parsing JSON", desc: "Convert HTTP response body to JS Object.", code: "const data = await res.json();", preview: "Data ready" },
+                { title: "Step 5: Try / Catch", desc: "Error handling for async requests.", code: "try { await fetch(); } catch(err) {}", preview: "Error caught" },
+                { title: "Step 6: Exam", isQuiz: true, question: "🎯 Write JS statement to await json parsing of variable res:", expectedAnswer: "await res.json();", altAnswer: "await res.json()" }
+            ]}
+        };
+
+        // 10 JS QUEST COMPETITION QUESTIONS
+        const questQuestions = [
+            { q: "Q1. Write JS statement to log 'hello' using console.log:", ans: "console.log('hello');", alt: "console.log(\"hello\");" },
+            { q: "Q2. Write JS constant variable declaration for x equal to 10:", ans: "const x = 10;", alt: "const x=10;" },
+            { q: "Q3. Write arrow function syntax assigned to const run that returns 'ok':", ans: "const run = () => 'ok';", alt: "const run=()=>'ok';" },
+            { q: "Q4. Write JS ternary statement checking if x is equal to 5 return 'yes' else 'no':", ans: "x === 5 ? 'yes' : 'no';", alt: "x==5?'yes':'no';" },
+            { q: "Q5. Write standard for loop header to iterate i from 0 to less than 5:", ans: "for(let i=0; i<5; i++)", alt: "for (let i = 0; i < 5; i++)" },
+            { q: "Q6. Write JS expression to get length of array arr:", ans: "arr.length;", alt: "arr.length" },
+            { q: "Q7. Write JS code to access property 'age' from object obj:", ans: "obj.age;", alt: "obj['age'];" },
+            { q: "Q8. Write JS method to select element with id 'app' using querySelector:", ans: "document.querySelector('#app');", alt: "document.querySelector(\"#app\");" },
+            { q: "Q9. Write array spread expression to clone array arr:", ans: "[...arr];", alt: "[...arr]" },
+            { q: "Q10. Write JS statement to await json parsing of variable res:", ans: "await res.json();", alt: "await res.json()" }
+        ];
+
+        let currentLevel = 1;
+        let currentStepIndex = 0;
+        let unlockedLevels = [1];
+        let completedLevels = [];
+
+        // Quest State
+        let questIndex = 0;
+        let questPoints = 0;
+
+        // DOM Nodes
+        const levelsContainer = document.getElementById("levels-container");
+        const screenLevels = document.getElementById("screen-levels");
+        const screenLearning = document.getElementById("screen-learning");
+        const screenQuest = document.getElementById("screen-quest");
+        const screenResult = document.getElementById("screen-result");
+
+        function renderLevelsMenu() {
+            levelsContainer.innerHTML = "";
+            for(let i = 1; i <= 10; i++) {
+                const lvl = levelsData[i];
+                const isUnlocked = unlockedLevels.includes(i);
+                const isCompleted = completedLevels.includes(i);
+
+                const card = document.createElement("div");
+                card.className = `level-card ${isUnlocked ? '' : 'locked'}`;
+                card.onclick = () => startLevel(i);
+                card.innerHTML = `
+                    <div class="level-left">
+                        <div class="level-icon">JS</div>
+                        <div class="level-info"><h3>${lvl.title}</h3><p>${lvl.steps[0].title}</p></div>
+                    </div>
+                    <div class="badge-status">${isCompleted ? '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i>' : isUnlocked ? '<i class="fa-solid fa-play" style="color:#f7df1e;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+                `;
+                levelsContainer.appendChild(card);
+            }
+
+            // 11th CARD: QUEST COMPETITION
+            const isQuestUnlocked = completedLevels.length >= 10;
+            const questCard = document.createElement("div");
+            questCard.className = `level-card quest-card ${isQuestUnlocked ? '' : 'locked'}`;
+            questCard.onclick = () => startQuest();
+            questCard.innerHTML = `
+                <div class="level-left">
+                    <div class="level-icon" style="border-color:#f7df1e; color:#f7df1e;"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="level-info"><h3 style="color:#f7df1e;">JS Quest Competition</h3><p>10 JavaScript Programming Questions</p></div>
+                </div>
+                <div class="badge-status">${isQuestUnlocked ? '<i class="fa-solid fa-bolt" style="color:#f7df1e;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+            `;
+            levelsContainer.appendChild(questCard);
+        }
+
+        function startLevel(lvl) {
+            if(!unlockedLevels.includes(lvl)) return alert("🔒 Complete previous levels first!");
+            currentLevel = lvl; currentStepIndex = 0;
+            showScreen(screenLearning);
+            renderStep();
+        }
+
+        function renderStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            document.getElementById("step-indicator-text").textContent = `Step ${currentStepIndex + 1} of 6`;
+            document.getElementById("btn-prev").disabled = (currentStepIndex === 0);
+            const box = document.getElementById("step-display");
+
+            if (stepData.isQuiz) {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.question}</p><input type="text" id="quiz-input" class="quiz-input-box" placeholder="Type JS code here..."><div id="quiz-feedback" class="feedback-text"></div>`;
+                document.getElementById("btn-next").innerHTML = `Verify & Unlock <i class="fa-solid fa-check-double"></i>`;
+            } else {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.desc}</p><div class="preview-grid"><div class="code-box"><div class="box-title"><i class="fa-solid fa-code"></i> JS Code</div><code>${escapeHtml(stepData.code)}</code></div><div class="output-box"><div class="box-title"><i class="fa-solid fa-terminal"></i> Console Output</div><div class="render-area">${stepData.preview}</div></div></div>`;
+                document.getElementById("btn-next").innerHTML = `Next <i class="fa-solid fa-chevron-right"></i>`;
+            }
+        }
+
+        function nextStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            if (stepData.isQuiz) {
+                const userAns = document.getElementById("quiz-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+                const expAns = stepData.expectedAnswer.toLowerCase().replace(/\s+/g, ' ');
+                const altAns = stepData.altAnswer ? stepData.altAnswer.toLowerCase().replace(/\s+/g, ' ') : "";
+
+                const feedback = document.getElementById("quiz-feedback");
+                if (userAns === expAns || (altAns && userAns === altAns)) {
+                    feedback.className = "feedback-text success-text"; feedback.innerHTML = "✅ Correct! Level Unlocked!";
+                    if (!completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
+                    if (currentLevel < 10 && !unlockedLevels.includes(currentLevel + 1)) unlockedLevels.push(currentLevel + 1);
+                    setTimeout(() => { goBackToLevels(); }, 1000);
+                } else {
+                    feedback.className = "feedback-text error-text"; feedback.innerHTML = "❌ Incorrect! Check JS syntax (e.g. quotes or semicolons).";
+                }
+            } else { if (currentStepIndex < 5) { currentStepIndex++; renderStep(); } }
+        }
+
+        function prevStep() { if (currentStepIndex > 0) { currentStepIndex--; renderStep(); } }
+
+        /* QUEST COMPETITION LOGIC */
+        function startQuest() {
+            if (completedLevels.length < 10) return alert("🔒 Complete all 10 Levels to unlock Quest Competition!");
+            questIndex = 0; questPoints = 0;
+            showScreen(screenQuest);
+            renderQuestQuestion();
+        }
+
+        function renderQuestQuestion() {
+            const qData = questQuestions[questIndex];
+            document.getElementById("quest-q-num").textContent = `Question ${questIndex + 1} of 10`;
+            
+            let currentPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            document.getElementById("quest-score-text").textContent = `Score: ${currentPct}%`;
+
+            document.getElementById("quest-display").innerHTML = `
+                <h3>${qData.q}</h3>
+                <input type="text" id="quest-input" class="quiz-input-box" placeholder="Type JS code here...">
+            `;
+        }
+
+        function submitQuestAnswer() {
+            const qData = questQuestions[questIndex];
+            const userAns = document.getElementById("quest-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+            const expAns = qData.ans.toLowerCase().replace(/\s+/g, ' ');
+            const altAns = qData.alt ? qData.alt.toLowerCase().replace(/\s+/g, ' ') : "";
+
+            if (userAns === expAns || (altAns && userAns === altAns)) {
+                questPoints += 10;
+            } else {
+                questPoints = Math.max(0, questPoints - 5);
+            }
+
+            questIndex++;
+            if (questIndex < 10) {
+                renderQuestQuestion();
+            } else {
+                finishQuest();
+            }
+        }
+
+        function finishQuest() {
+            let finalPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            showScreen(screenResult);
+            document.getElementById("result-score-val").textContent = `${finalPct}%`;
+
+            if (finalPct >= 77) {
+                document.getElementById("result-title").textContent = "🎉 Congratulations!";
+                document.getElementById("result-desc").textContent = "You successfully passed the JS Master Quest Competition!";
+                document.getElementById("btn-cert").style.display = "inline-flex";
+                confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
+            } else {
+                document.getElementById("result-title").textContent = "Nice Try!";
+                document.getElementById("result-desc").textContent = "You scored less than 77%. Try again to earn your JavaScript certificate!";
+                document.getElementById("btn-cert").style.display = "none";
+            }
+        }
+
+        /* CERTIFICATE GENERATION - UNIQUE JS GOLDEN DARK THEME */
+        function openCertModal() { document.getElementById("modal-cert").classList.add("active"); }
+        function closeCertModal() { document.getElementById("modal-cert").classList.remove("active"); }
+
+        function generateCertificate() {
+            const name = document.getElementById("user-name").value.trim();
+            const age = document.getElementById("user-age").value.trim();
+            if (!name || !age) return alert("Please enter both Name and Age!");
+
+            const canvas = document.getElementById("certCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Background Gradient (Cyber Dark Amber Gold)
+            const bgGrad = ctx.createLinearGradient(0, 0, 800, 600);
+            bgGrad.addColorStop(0, "#0e0d02");
+            bgGrad.addColorStop(0.5, "#262208");
+            bgGrad.addColorStop(1, "#0a0902");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Gold Neon Borders
+            ctx.strokeStyle = "#f7df1e";
+            ctx.lineWidth = 6;
+            ctx.strokeRect(25, 25, 750, 550);
+
+            ctx.strokeStyle = "#f59e0b";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(35, 35, 730, 530);
+
+            // JS Logo Badge Box in Top Corner
+            ctx.fillStyle = "#f7df1e";
+            ctx.fillRect(70, 65, 50, 50);
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 26px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("JS", 95, 100);
+
+            // Header Title
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 28px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("CERTIFICATE OF JAVASCRIPT MASTERY", 430, 95);
+
+            ctx.fillStyle = "#f7df1e";
+            ctx.font = "bold 18px Poppins, sans-serif";
+            ctx.fillText("MODERN ECMASCRIPT & WEB DEVELOPMENT", 430, 130);
+
+            // Recipient Details
+            ctx.fillStyle = "#e4e4e7";
+            ctx.font = "16px Poppins, sans-serif";
+            ctx.fillText("This certificate is officially presented to", 400, 220);
+
+            ctx.fillStyle = "#fef08a";
+            ctx.font = "bold 38px Poppins, sans-serif";
+            ctx.fillText(name.toUpperCase(), 400, 280);
+
+            ctx.fillStyle = "#a1a1aa";
+            ctx.font = "15px Poppins, sans-serif";
+            ctx.fillText(`Age: ${age} | Mastered Variables, DOM, Functions, ES6+ & Async/Await`, 400, 330);
+
+            // Score & Verification
+            ctx.fillStyle = "#f59e0b";
+            ctx.font = "bold 18px Orbitron, sans-serif";
+            ctx.fillText(`FINAL SCORE: ${document.getElementById("result-score-val").textContent} (PASSED)`, 400, 420);
+
+            const dateStr = new Date().toLocaleDateString();
+            ctx.fillStyle = "#71717a";
+            ctx.font = "14px Poppins, sans-serif";
+            ctx.fillText(`Issued Date: ${dateStr} | JS Master Certification`, 400, 470);
+
+            // Download Trigger
+            const imageURI = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `${name.replace(/\s+/g, '_')}_JS_Master_Certificate.png`;
+            link.href = imageURI;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            closeCertModal();
+        }
+
+        function goBackToLevels() { showScreen(screenLevels); renderLevelsMenu(); }
+        function showScreen(screen) {
+            [screenLevels, screenLearning, screenQuest, screenResult].forEach(s => s.classList.remove("active"));
+            screen.classList.add("active");
+        }
+        function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+        renderLevelsMenu();
+    </script>
+</body>
+</html>

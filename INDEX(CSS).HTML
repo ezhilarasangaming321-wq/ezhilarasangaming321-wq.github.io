@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Master - 10 Levels & Quest Competition</title>
+    <!-- Icons & Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --glass-bg: rgba(16, 24, 39, 0.7);
+            --glass-border: rgba(56, 189, 248, 0.2);
+            --css-neon: #38bdf8;
+            --css-accent: #a855f7;
+            --text-silver: #f1f5f9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-silver);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .glass-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-glass {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-glass:hover:not(:disabled) {
+            border-color: var(--css-neon);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-glass:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(168, 85, 247, 0.3));
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        header { margin-bottom: 25px; text-align: center; }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header h1 span { color: var(--css-neon); -webkit-text-fill-color: var(--css-neon); }
+
+        .screen { width: 100%; max-width: 720px; display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* LEVEL MENU */
+        .level-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .level-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--glass-border);
+        }
+
+        .level-card:hover:not(.locked) { border-color: var(--css-neon); transform: translateY(-2px); }
+        .level-card.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.8); }
+        .level-card.quest-card { 
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2)); 
+            border-color: rgba(168, 85, 247, 0.5); 
+        }
+
+        .level-left { display: flex; align-items: center; gap: 14px; }
+
+        .level-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--css-neon);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--css-neon);
+        }
+
+        .level-info h3 { font-size: 1rem; color: #fff; }
+        .level-info p { font-size: 0.8rem; color: #94a3b8; }
+
+        /* STEP & QUEST SCREENS */
+        .step-container { padding: 24px; position: relative; }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+        }
+
+        .step-indicator { font-size: 0.85rem; color: var(--css-neon); font-weight: 600; }
+
+        .quest-score-badge {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--css-neon);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            color: var(--css-neon);
+            font-size: 0.85rem;
+        }
+
+        .step-content-box {
+            min-height: 240px;
+            background: rgba(5, 10, 20, 0.65);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .step-content-box h3 { color: var(--css-neon); margin-bottom: 10px; font-size: 1.1rem; }
+        .step-content-box p { font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 14px; }
+
+        .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        @media (max-width: 550px) { .preview-grid { grid-template-columns: 1fr; } }
+
+        .code-box, .output-box {
+            background: #030712;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.82rem;
+        }
+
+        .box-title {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+        }
+
+        .code-box code { font-family: monospace; color: #38bdf8; white-space: pre-wrap; word-break: break-all; }
+        .output-box .render-area { background: #ffffff; color: #0f172a; padding: 10px; border-radius: 6px; min-height: 60px; font-family: sans-serif; overflow-x: auto; }
+
+        .navigation-btns { display: flex; justify-content: space-between; align-items: center; }
+
+        .quiz-input-box {
+            width: 100%;
+            background: #030712;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.95rem;
+            margin-top: 12px;
+            outline: none;
+        }
+
+        .feedback-text { margin-top: 12px; font-size: 0.9rem; font-weight: 600; }
+        .success-text { color: #4ade80; }
+        .error-text { color: #f87171; }
+
+        /* MODAL POPUP FOR CERTIFICATE */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-card h3 { color: var(--css-neon); margin-bottom: 12px; }
+        .modal-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #030712;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CSS <span>MASTER</span></h1>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Complete 10-Level Styling Course & Quest</p>
+    </header>
+
+    <!-- 1. LEVEL MENU -->
+    <section class="screen active" id="screen-levels">
+        <div class="glass-box level-card-list" id="levels-container"></div>
+    </section>
+
+    <!-- 2. LEARNING SCREEN -->
+    <section class="screen" id="screen-learning">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Levels
+                </button>
+                <span class="step-indicator" id="step-indicator-text">Step 1 of 6</span>
+            </div>
+
+            <div class="step-content-box" id="step-display"></div>
+
+            <div class="navigation-btns">
+                <button class="btn-glass" id="btn-prev" onclick="prevStep()">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                <button class="btn-glass btn-primary" id="btn-next" onclick="nextStep()">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. QUEST COMPETITION SCREEN -->
+    <section class="screen" id="screen-quest">
+        <div class="glass-box step-container">
+            <div class="step-header">
+                <button class="btn-glass" onclick="goBackToLevels()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Exit Quest
+                </button>
+                <span class="step-indicator" id="quest-q-num">Question 1 of 10</span>
+                <div class="quest-score-badge" id="quest-score-text">Score: 0%</div>
+            </div>
+
+            <div class="step-content-box" id="quest-display"></div>
+
+            <div class="navigation-btns" style="justify-content: flex-end;">
+                <button class="btn-glass btn-primary" id="btn-quest-submit" onclick="submitQuestAnswer()">
+                    Submit Answer <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. QUEST RESULT SCREEN -->
+    <section class="screen" id="screen-result">
+        <div class="glass-box step-container" style="text-align: center;">
+            <i class="fa-solid fa-award" style="font-size: 3.5rem; color: #a855f7; margin-bottom: 12px;"></i>
+            <h2 style="color: #fff;" id="result-title">Congratulations!</h2>
+            <p style="margin: 10px 0; color: #94a3b8;" id="result-desc"></p>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--css-neon); margin: 15px 0;" id="result-score-val">0%</div>
+
+            <button class="btn-glass btn-primary" id="btn-cert" onclick="openCertModal()" style="margin-top: 10px;">
+                <i class="fa-solid fa-download"></i> Download CSS Certificate
+            </button>
+            <br><br>
+            <button class="btn-glass" onclick="goBackToLevels()">Back to Levels</button>
+        </div>
+    </section>
+
+    <!-- MODAL FOR USER DETAILS -->
+    <div class="modal-overlay" id="modal-cert">
+        <div class="modal-card">
+            <h3>CSS Master Certificate Details</h3>
+            <label style="font-size: 0.8rem; color:#94a3b8;">Enter Your Full Name:</label>
+            <input type="text" id="user-name" placeholder="e.g. Alex Morgan">
+            <label style="font-size: 0.8rem; color:#94a3b8;">Enter Your Age:</label>
+            <input type="number" id="user-age" placeholder="e.g. 17">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn-glass" onclick="closeCertModal()">Cancel</button>
+                <button class="btn-glass btn-primary" onclick="generateCertificate()">Generate & Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Canvas for Certificate Image Generation -->
+    <canvas id="certCanvas" width="800" height="600" style="display:none;"></canvas>
+
+    <script>
+        const levelsData = {
+            1: { title: "Level 1: Colors & Backgrounds", steps: [
+                { title: "Step 1: Text Color", desc: "Use color property to change text color.", code: "color: red;", preview: "<span style='color:red;'>Red Text</span>" },
+                { title: "Step 2: Background Color", desc: "Use background-color property.", code: "background-color: yellow;", preview: "<span style='background-color:yellow; color:black; padding:2px;'>Yellow BG</span>" },
+                { title: "Step 3: Hex Color Codes", desc: "Colors can be defined using Hex codes.", code: "color: #38bdf8;", preview: "<span style='color:#38bdf8;'>Hex Blue</span>" },
+                { title: "Step 4: RGB Colors", desc: "RGB values specify red, green, blue.", code: "color: rgb(255, 0, 0);", preview: "<span style='color:rgb(255, 0, 0);'>RGB Red</span>" },
+                { title: "Step 5: Opacity", desc: "Opacity controls element transparency.", code: "opacity: 0.5;", preview: "<span style='opacity:0.5;'>Transparent Text</span>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write a CSS rule to set text color to red:", expectedAnswer: "color: red;", altAnswer: "color:red;" }
+            ]},
+            2: { title: "Level 2: Typography & Fonts", steps: [
+                { title: "Step 1: Font Size", desc: "Controls text size.", code: "font-size: 20px;", preview: "<span style='font-size:20px;'>Large Text</span>" },
+                { title: "Step 2: Font Weight", desc: "Controls bold thickness.", code: "font-weight: bold;", preview: "<span style='font-weight:bold;'>Bold Text</span>" },
+                { title: "Step 3: Text Align", desc: "Aligns text alignment.", code: "text-align: center;", preview: "<div style='text-align:center;'>Centered Text</div>" },
+                { title: "Step 4: Text Decoration", desc: "Adds underline or line-through.", code: "text-decoration: underline;", preview: "<span style='text-decoration:underline;'>Underline</span>" },
+                { title: "Step 5: Text Transform", desc: "Converts case uppercase/lowercase.", code: "text-transform: uppercase;", preview: "<span style='text-transform:uppercase;'>uppercase</span>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS property to make text size 24px:", expectedAnswer: "font-size: 24px;", altAnswer: "font-size:24px;" }
+            ]},
+            3: { title: "Level 3: Box Model (Padding & Margin)", steps: [
+                { title: "Step 1: Padding", desc: "Space inside borders.", code: "padding: 10px;", preview: "<div style='background:#1e293b; padding:10px; color:#fff;'>Padded Box</div>" },
+                { title: "Step 2: Margin", desc: "Space outside borders.", code: "margin: 15px;", preview: "<div style='background:#334155; margin:10px; color:#fff;'>Margined Box</div>" },
+                { title: "Step 3: Border", desc: "Border width, style, color.", code: "border: 2px solid blue;", preview: "<div style='border:2px solid #38bdf8; padding:5px;'>Border Box</div>" },
+                { title: "Step 4: Border Radius", desc: "Rounds the corners.", code: "border-radius: 10px;", preview: "<div style='background:#0284c7; border-radius:10px; padding:5px; color:#fff;'>Rounded Box</div>" },
+                { title: "Step 5: Box Sizing", desc: "Includes padding/border in total width.", code: "box-sizing: border-box;", preview: "<div>Border Box Sizing</div>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS property for 10px rounded corners:", expectedAnswer: "border-radius: 10px;", altAnswer: "border-radius:10px;" }
+            ]},
+            4: { title: "Level 4: Sizing & Display", steps: [
+                { title: "Step 1: Width & Height", desc: "Defines element dimensions.", code: "width: 100px; height: 50px;", preview: "<div style='width:100px; height:40px; background:#0ea5e9; color:#fff;'>Box</div>" },
+                { title: "Step 2: Display Block", desc: "Takes full line width.", code: "display: block;", preview: "<span style='display:block; background:#1e293b; color:#fff;'>Block Element</span>" },
+                { title: "Step 3: Display Inline", desc: "Takes only necessary width.", code: "display: inline;", preview: "<div style='display:inline; background:#0284c7; color:#fff;'>Inline Box</div>" },
+                { title: "Step 4: Display None", desc: "Hides element completely.", code: "display: none;", preview: "<em>Hidden element</em>" },
+                { title: "Step 5: Visibility Hidden", desc: "Hides element but retains space.", code: "visibility: hidden;", preview: "<em>Space preserved</em>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS rule to hide an element completely:", expectedAnswer: "display: none;", altAnswer: "display:none;" }
+            ]},
+            5: { title: "Level 5: Flexbox Basics", steps: [
+                { title: "Step 1: Display Flex", desc: "Turns container into flexbox.", code: "display: flex;", preview: "<div style='display:flex; gap:5px;'><button>1</button><button>2</button></div>" },
+                { title: "Step 2: Flex Direction", desc: "Defines main axis column/row.", code: "flex-direction: column;", preview: "<div style='display:flex; flex-direction:column; gap:2px;'><button>A</button><button>B</button></div>" },
+                { title: "Step 3: Justify Content Center", desc: "Centers items horizontally.", code: "justify-content: center;", preview: "<div style='display:flex; justify-content:center;'><button>Center</button></div>" },
+                { title: "Step 4: Align Items Center", desc: "Centers items vertically.", code: "align-items: center;", preview: "<div style='display:flex; align-items:center; height:40px; background:#1e293b;'><button>Middle</button></div>" },
+                { title: "Step 5: Flex Gap", desc: "Gaps between items.", code: "gap: 15px;", preview: "<div style='display:flex; gap:15px;'><button>X</button><button>Y</button></div>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS rule to activate flex container:", expectedAnswer: "display: flex;", altAnswer: "display:flex;" }
+            ]},
+            6: { title: "Level 6: Positioning", steps: [
+                { title: "Step 1: Position Relative", desc: "Positions relative to normal placement.", code: "position: relative;", preview: "<div>Relative Box</div>" },
+                { title: "Step 2: Position Absolute", desc: "Positions relative to parent relative.", code: "position: absolute;", preview: "<div>Absolute Box</div>" },
+                { title: "Step 3: Top Left Offset", desc: "Offsets element.", code: "top: 10px; left: 20px;", preview: "<div>Offset Box</div>" },
+                { title: "Step 4: Position Fixed", desc: "Fixed to viewport window.", code: "position: fixed;", preview: "<div>Fixed Pos</div>" },
+                { title: "Step 5: Z-Index", desc: "Stacking layer order.", code: "z-index: 10;", preview: "<div>Layer Order</div>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS rule to set fixed positioning:", expectedAnswer: "position: fixed;", altAnswer: "position:fixed;" }
+            ]},
+            7: { title: "Level 7: CSS Grid", steps: [
+                { title: "Step 1: Display Grid", desc: "Turns container into grid layout.", code: "display: grid;", preview: "<div>Grid Container</div>" },
+                { title: "Step 2: Grid Template Columns", desc: "Defines grid column tracks.", code: "grid-template-columns: 1fr 1fr;", preview: "<div style='display:grid; grid-template-columns:1fr 1fr; gap:5px;'><button>Col 1</button><button>Col 2</button></div>" },
+                { title: "Step 3: Grid Gap", desc: "Spacing in grid elements.", code: "gap: 10px;", preview: "<div>Grid Gap</div>" },
+                { title: "Step 4: Align Grid", desc: "Grid item placement.", code: "place-items: center;", preview: "<div>Centered Grid Item</div>" },
+                { title: "Step 5: Grid Column Span", desc: "Item spans across columns.", code: "grid-column: span 2;", preview: "<div>Column Span</div>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS rule to activate grid layout:", expectedAnswer: "display: grid;", altAnswer: "display:grid;" }
+            ]},
+            8: { title: "Level 8: Pseudo-Classes & Effects", steps: [
+                { title: "Step 1: Hover Effect", desc: "Triggers on cursor hover.", code: ":hover { color: cyan; }", preview: "<button style='padding:4px;'>Hover Me</button>" },
+                { title: "Step 2: Active Effect", desc: "Triggers on mouse click active.", code: ":active { transform: scale(0.9); }", preview: "<button>Click Me</button>" },
+                { title: "Step 3: Focus Effect", desc: "Triggers on form input focus.", code: ":focus { border-color: blue; }", preview: "<input placeholder='Focus here'>" },
+                { title: "Step 4: Box Shadow", desc: "Adds box drop shadows.", code: "box-shadow: 0 4px 10px black;", preview: "<div style='box-shadow:0 4px 10px rgba(0,0,0,0.5); padding:5px;'>Shadow Box</div>" },
+                { title: "Step 5: Text Shadow", desc: "Adds glowing text shadows.", code: "text-shadow: 0 0 5px cyan;", preview: "<span style='text-shadow:0 0 5px #38bdf8;'>Glow Text</span>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS box-shadow rule for 0 0 5px black:", expectedAnswer: "box-shadow: 0 0 5px black;", altAnswer: "box-shadow:0 0 5px black;" }
+            ]},
+            9: { title: "Level 9: Transitions & Transforms", steps: [
+                { title: "Step 1: CSS Transition", desc: "Smooth state changes.", code: "transition: all 0.3s ease;", preview: "<div>Smooth Change</div>" },
+                { title: "Step 2: Transform Scale", desc: "Resizes element size.", code: "transform: scale(1.2);", preview: "<div style='transform:scale(1.1); display:inline-block;'>Scaled Up</div>" },
+                { title: "Step 3: Transform Rotate", desc: "Rotates element angle.", code: "transform: rotate(5deg);", preview: "<div style='transform:rotate(5deg); display:inline-block;'>Rotated</div>" },
+                { title: "Step 4: Transform Translate", desc: "Moves element along X/Y axes.", code: "transform: translateY(-5px);", preview: "<div>Lifted Box</div>" },
+                { title: "Step 5: Cursor Pointer", desc: "Shows hand cursor icon.", code: "cursor: pointer;", preview: "<button style='cursor:pointer;'>Pointer Hand</button>" },
+                { title: "Step 6: Test", isQuiz: true, question: "🎯 Write CSS rule to change cursor to pointer hand:", expectedAnswer: "cursor: pointer;", altAnswer: "cursor:pointer;" }
+            ]},
+            10: { title: "Level 10: Advanced CSS Variables & Media Queries", steps: [
+                { title: "Step 1: CSS Variables", desc: "Defines reusable custom properties.", code: "--main-color: #38bdf8;", preview: "<div>Root Variable</div>" },
+                { title: "Step 2: Using Var()", desc: "Retrieves variable value.", code: "color: var(--main-color);", preview: "<span style='color:#38bdf8;'>Var Colored</span>" },
+                { title: "Step 3: Backdrop Filter", desc: "Creates glassmorphism blur.", code: "backdrop-filter: blur(10px);", preview: "<div style='backdrop-filter:blur(5px); background:rgba(255,255,255,0.2); padding:5px;'>Glass Box</div>" },
+                { title: "Step 4: Linear Gradient", desc: "Multi-color background blend.", code: "background: linear-gradient(to right, red, blue);", preview: "<div style='background:linear-gradient(to right, #38bdf8, #a855f7); color:#fff; padding:5px;'>Gradient</div>" },
+                { title: "Step 5: Media Queries", desc: "Responsive breakpoints for mobile.", code: "@media (max-width: 600px) {}", preview: "<div>Responsive Query</div>" },
+                { title: "Step 6: Exam", isQuiz: true, question: "🎯 Write CSS property to use var(--bg-color):", expectedAnswer: "background: var(--bg-color);", altAnswer: "color: var(--bg-color);" }
+            ]}
+        };
+
+        // 10 CSS QUEST COMPETITION QUESTIONS
+        const questQuestions = [
+            { q: "Q1. Write CSS property to make text color green:", ans: "color: green;", alt: "color:green;" },
+            { q: "Q2. Write CSS property to set font size to 18px:", ans: "font-size: 18px;", alt: "font-size:18px;" },
+            { q: "Q3. Write CSS property for 8px rounded corners:", ans: "border-radius: 8px;", alt: "border-radius:8px;" },
+            { q: "Q4. Write CSS rule to convert element to flex container:", ans: "display: flex;", alt: "display:flex;" },
+            { q: "Q5. Write CSS rule to set center alignment for text:", ans: "text-align: center;", alt: "text-align:center;" },
+            { q: "Q6. Write CSS rule to set fixed position:", ans: "position: fixed;", alt: "position:fixed;" },
+            { q: "Q7. Write CSS rule to hide an element completely:", ans: "display: none;", alt: "display:none;" },
+            { q: "Q8. Write CSS rule to change cursor icon to pointer:", ans: "cursor: pointer;", alt: "cursor:pointer;" },
+            { q: "Q9. Write CSS property to set 15px inner box space (padding):", ans: "padding: 15px;", alt: "padding:15px;" },
+            { q: "Q10. Write CSS property to make font style bold:", ans: "font-weight: bold;", alt: "font-weight:bold;" }
+        ];
+
+        let currentLevel = 1;
+        let currentStepIndex = 0;
+        let unlockedLevels = [1];
+        let completedLevels = [];
+
+        // Quest State
+        let questIndex = 0;
+        let questPoints = 0;
+
+        // DOM Nodes
+        const levelsContainer = document.getElementById("levels-container");
+        const screenLevels = document.getElementById("screen-levels");
+        const screenLearning = document.getElementById("screen-learning");
+        const screenQuest = document.getElementById("screen-quest");
+        const screenResult = document.getElementById("screen-result");
+
+        function renderLevelsMenu() {
+            levelsContainer.innerHTML = "";
+            for(let i = 1; i <= 10; i++) {
+                const lvl = levelsData[i];
+                const isUnlocked = unlockedLevels.includes(i);
+                const isCompleted = completedLevels.includes(i);
+
+                const card = document.createElement("div");
+                card.className = `level-card ${isUnlocked ? '' : 'locked'}`;
+                card.onclick = () => startLevel(i);
+                card.innerHTML = `
+                    <div class="level-left">
+                        <div class="level-icon"><i class="fa-solid fa-${i}"></i></div>
+                        <div class="level-info"><h3>${lvl.title}</h3><p>${lvl.steps[0].title}</p></div>
+                    </div>
+                    <div class="badge-status">${isCompleted ? '<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i>' : isUnlocked ? '<i class="fa-solid fa-play" style="color:#38bdf8;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+                `;
+                levelsContainer.appendChild(card);
+            }
+
+            // 11th CARD: QUEST COMPETITION
+            const isQuestUnlocked = completedLevels.length >= 10;
+            const questCard = document.createElement("div");
+            questCard.className = `level-card quest-card ${isQuestUnlocked ? '' : 'locked'}`;
+            questCard.onclick = () => startQuest();
+            questCard.innerHTML = `
+                <div class="level-left">
+                    <div class="level-icon" style="border-color:#a855f7; color:#a855f7;"><i class="fa-solid fa-award"></i></div>
+                    <div class="level-info"><h3 style="color:#a855f7;">CSS Quest Competition</h3><p>10 CSS Styling Questions</p></div>
+                </div>
+                <div class="badge-status">${isQuestUnlocked ? '<i class="fa-solid fa-bolt" style="color:#a855f7;"></i>' : '<i class="fa-solid fa-lock" style="color:#64748b;"></i>'}</div>
+            `;
+            levelsContainer.appendChild(questCard);
+        }
+
+        function startLevel(lvl) {
+            if(!unlockedLevels.includes(lvl)) return alert("🔒 Complete previous levels first!");
+            currentLevel = lvl; currentStepIndex = 0;
+            showScreen(screenLearning);
+            renderStep();
+        }
+
+        function renderStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            document.getElementById("step-indicator-text").textContent = `Step ${currentStepIndex + 1} of 6`;
+            document.getElementById("btn-prev").disabled = (currentStepIndex === 0);
+            const box = document.getElementById("step-display");
+
+            if (stepData.isQuiz) {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.question}</p><input type="text" id="quiz-input" class="quiz-input-box" placeholder="Type CSS rule here..."><div id="quiz-feedback" class="feedback-text"></div>`;
+                document.getElementById("btn-next").innerHTML = `Verify & Unlock <i class="fa-solid fa-check-double"></i>`;
+            } else {
+                box.innerHTML = `<h3>${stepData.title}</h3><p>${stepData.desc}</p><div class="preview-grid"><div class="code-box"><div class="box-title"><i class="fa-solid fa-code"></i> CSS Code</div><code>${escapeHtml(stepData.code)}</code></div><div class="output-box"><div class="box-title"><i class="fa-solid fa-eye"></i> Visual Preview</div><div class="render-area">${stepData.preview}</div></div></div>`;
+                document.getElementById("btn-next").innerHTML = `Next <i class="fa-solid fa-chevron-right"></i>`;
+            }
+        }
+
+        function nextStep() {
+            const stepData = levelsData[currentLevel].steps[currentStepIndex];
+            if (stepData.isQuiz) {
+                const userAns = document.getElementById("quiz-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+                const expAns = stepData.expectedAnswer.toLowerCase().replace(/\s+/g, ' ');
+                const altAns = stepData.altAnswer ? stepData.altAnswer.toLowerCase().replace(/\s+/g, ' ') : "";
+
+                const feedback = document.getElementById("quiz-feedback");
+                if (userAns === expAns || (altAns && userAns === altAns)) {
+                    feedback.className = "feedback-text success-text"; feedback.innerHTML = "✅ Correct! Level Unlocked!";
+                    if (!completedLevels.includes(currentLevel)) completedLevels.push(currentLevel);
+                    if (currentLevel < 10 && !unlockedLevels.includes(currentLevel + 1)) unlockedLevels.push(currentLevel + 1);
+                    setTimeout(() => { goBackToLevels(); }, 1000);
+                } else {
+                    feedback.className = "feedback-text error-text"; feedback.innerHTML = "❌ Incorrect! Check CSS syntax (e.g. semicolon ';').";
+                }
+            } else { if (currentStepIndex < 5) { currentStepIndex++; renderStep(); } }
+        }
+
+        function prevStep() { if (currentStepIndex > 0) { currentStepIndex--; renderStep(); } }
+
+        /* QUEST COMPETITION LOGIC */
+        function startQuest() {
+            if (completedLevels.length < 10) return alert("🔒 Complete all 10 Levels to unlock Quest Competition!");
+            questIndex = 0; questPoints = 0;
+            showScreen(screenQuest);
+            renderQuestQuestion();
+        }
+
+        function renderQuestQuestion() {
+            const qData = questQuestions[questIndex];
+            document.getElementById("quest-q-num").textContent = `Question ${questIndex + 1} of 10`;
+            
+            let currentPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            document.getElementById("quest-score-text").textContent = `Score: ${currentPct}%`;
+
+            document.getElementById("quest-display").innerHTML = `
+                <h3>${qData.q}</h3>
+                <input type="text" id="quest-input" class="quiz-input-box" placeholder="Type CSS code here...">
+            `;
+        }
+
+        function submitQuestAnswer() {
+            const qData = questQuestions[questIndex];
+            const userAns = document.getElementById("quest-input").value.trim().toLowerCase().replace(/\s+/g, ' ');
+            const expAns = qData.ans.toLowerCase().replace(/\s+/g, ' ');
+            const altAns = qData.alt ? qData.alt.toLowerCase().replace(/\s+/g, ' ') : "";
+
+            if (userAns === expAns || (altAns && userAns === altAns)) {
+                questPoints += 10;
+            } else {
+                questPoints = Math.max(0, questPoints - 5);
+            }
+
+            questIndex++;
+            if (questIndex < 10) {
+                renderQuestQuestion();
+            } else {
+                finishQuest();
+            }
+        }
+
+        function finishQuest() {
+            let finalPct = Math.max(0, Math.min(100, Math.round((questPoints / 100) * 100)));
+            showScreen(screenResult);
+            document.getElementById("result-score-val").textContent = `${finalPct}%`;
+
+            if (finalPct >= 77) {
+                document.getElementById("result-title").textContent = "🎉 Congratulations!";
+                document.getElementById("result-desc").textContent = "You successfully passed the CSS Master Quest Competition!";
+                document.getElementById("btn-cert").style.display = "inline-flex";
+                confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
+            } else {
+                document.getElementById("result-title").textContent = "Nice Try!";
+                document.getElementById("result-desc").textContent = "You scored less than 77%. Try again to earn your CSS certificate!";
+                document.getElementById("btn-cert").style.display = "none";
+            }
+        }
+
+        /* CERTIFICATE GENERATION - GLASSY EMERALD/CYAN THEME */
+        function openCertModal() { document.getElementById("modal-cert").classList.add("active"); }
+        function closeCertModal() { document.getElementById("modal-cert").classList.remove("active"); }
+
+        function generateCertificate() {
+            const name = document.getElementById("user-name").value.trim();
+            const age = document.getElementById("user-age").value.trim();
+            if (!name || !age) return alert("Please enter both Name and Age!");
+
+            const canvas = document.getElementById("certCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // Background Gradient (CSS Deep Ocean Glassy)
+            const bgGrad = ctx.createLinearGradient(0, 0, 800, 600);
+            bgGrad.addColorStop(0, "#090d16");
+            bgGrad.addColorStop(0.5, "#0f172a");
+            bgGrad.addColorStop(1, "#1e1035");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Glowing Glass Border
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 6;
+            ctx.strokeRect(25, 25, 750, 550);
+
+            ctx.strokeStyle = "#a855f7";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(35, 35, 730, 530);
+
+            // Header Title
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 30px Orbitron, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("CERTIFICATE OF EXCELLENCE", 400, 95);
+
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "bold 20px Poppins, sans-serif";
+            ctx.fillText("CSS3 STYLING & MASTER QUEST", 400, 135);
+
+            // Recipient Details
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "16px Poppins, sans-serif";
+            ctx.fillText("This certificate is proudly awarded to", 400, 220);
+
+            ctx.fillStyle = "#f3e8ff";
+            ctx.font = "bold 36px Poppins, sans-serif";
+            ctx.fillText(name.toUpperCase(), 400, 280);
+
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "15px Poppins, sans-serif";
+            ctx.fillText(`Age: ${age} | Mastered CSS Layouts, Flexbox, Grid & Animations`, 400, 330);
+
+            // Score & Verification
+            ctx.fillStyle = "#a855f7";
+            ctx.font = "bold 18px Orbitron, sans-serif";
+            ctx.fillText(`FINAL SCORE: ${document.getElementById("result-score-val").textContent} (PASSED)`, 400, 420);
+
+            const dateStr = new Date().toLocaleDateString();
+            ctx.fillStyle = "#64748b";
+            ctx.font = "14px Poppins, sans-serif";
+            ctx.fillText(`Issued Date: ${dateStr} | CSS Master Certification`, 400, 470);
+
+            // Download Trigger
+            const imageURI = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `${name.replace(/\s+/g, '_')}_CSS_Master_Certificate.png`;
+            link.href = imageURI;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            closeCertModal();
+        }
+
+        function goBackToLevels() { showScreen(screenLevels); renderLevelsMenu(); }
+        function showScreen(screen) {
+            [screenLevels, screenLearning, screenQuest, screenResult].forEach(s => s.classList.remove("active"));
+            screen.classList.add("active");
+        }
+        function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+        renderLevelsMenu();
+    </script>
+</body>
+</html>
