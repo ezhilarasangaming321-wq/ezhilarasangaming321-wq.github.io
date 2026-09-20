@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photopea Workshop - Glassy & Metallic</title>
+    <link rel="stylesheet" href="photopea.css">
+</head>
+<body>
+
+    <div class="app-window" id="appWindow">
+        <!-- டாப் ரோ (Top Header Row) -->
+        <div class="window-top-bar">
+            <div class="top-left">
+                <button class="back-btn" id="backBtn" onclick="goBackToMenu()">
+                    <span>←</span> Back
+                </button>
+                <span class="window-title">Workshop / Photopea Studio</span>
+            </div>
+
+            <!-- மினிமைஸ், ஃபுல்-ஸ்கிரீன், க்ளோஸ் கண்ட்ரோல்ஸ் -->
+            <div class="window-controls">
+                <button class="ctrl-btn" id="minBtn" title="Minimize / Focus" onclick="toggleMinimize()">_</button>
+                <button class="ctrl-btn" id="fullScreenBtn" title="Full Screen" onclick="toggleFullScreen()">⛶</button>
+                <button class="ctrl-btn close" title="Close / Exit" onclick="handleClose()">×</button>
+            </div>
+        </div>
+
+        <!-- மெட்டாலிக் & கிளாஸி கெட் ஸ்டார்ட் லேண்டிங் ஸ்கிரீன் -->
+        <div class="landing-overlay" id="landingOverlay">
+            <div class="glassy-card">
+                <h1>PHOTOPEA</h1>
+                <p>"Notice: Photopea runs as a free web app and may display advertisements. To reduce or block ads, please enable an ad blocker extension in your browser settings."</p>
+                <button class="unique-get-started-btn" onclick="startPhotopea()">
+                    ✨ Get Started
+                </button>
+            </div>
+        </div>
+
+        <!-- கீழேயுள்ள முழு பகுதி போட்டோபீ ஐஃப்ரேம் -->
+        <div class="workspace-content" id="workspaceContent">
+            <iframe id="photopeaIframe" src="https://www.photopea.com/" 
+                    allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; clipboard-read; clipboard-write;"
+                    allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <script src="photopea.js"></script>
+</body>
+</html>

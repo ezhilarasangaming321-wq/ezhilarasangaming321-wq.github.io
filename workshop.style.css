@@ -1,0 +1,93 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    width: 100%;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(circle at top, #1a2233 0%, #0d1117 100%);
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+}
+
+.workshop-container {
+    width: 100%;
+    max-width: 1200px;
+}
+
+.workshop-title {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+    color: #f3f4f6;
+}
+
+/* 3 பாக்ஸ்கள் மட்டும் வர கிரிட் 레이அவுட் */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+@media (max-width: 900px) {
+    .cards-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+/* கிளாஸி கார்டு ஸ்டைல் (ஹைட் குறைக்கப்பட்டுள்ளது) */
+.project-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px 20px;
+    height: 180px; /* ஹைட் குறைத்து நீட்டாக மாற்றப்பட்டுள்ளது */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.project-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 210, 255, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 210, 255, 0.15);
+}
+
+/* இமேஜ் கண்டெய்னர் (ஃபோல்டருக்குப் பதில் இமேஜ் வர) */
+.card-image-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0,0,0,0.2);
+}
+
+.card-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* பிராஜெக்ட் பெயர் லேபிள் */
+.project-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e5e7eb;
+    text-align: center;
+}
