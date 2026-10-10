@@ -9,15 +9,15 @@ const projects = [
     },
     {
         id: 2,
-        title: "Project 2 Name",
-        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&auto=format&fit=crop&q=80",
-        link: "#project2"
+        title: "CSS Generator",
+        imageUrl: "CSS.PNG",
+        link: "SVG.HTML"
     },
     {
         id: 3,
-        title: "Project 3 Name",
-        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&auto=format&fit=crop&q=80",
-        link: "#project3"
+        title: "Polarr EDITOR",
+        imageUrl: "Polarr.PNG",
+        link: "Polarr.HTML"
     }
 ];
 
