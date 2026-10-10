@@ -11,13 +11,13 @@ const projects = [
         id: 2,
         title: "CSS Generator",
         imageUrl: "CSS.PNG",
-        link: "SVG.HTML"
+        link: "SVG.html"
     },
     {
         id: 3,
         title: "Polarr EDITOR",
         imageUrl: "Polarr.PNG",
-        link: "Polarr.HTML"
+        link: "Polarr.html"
     }
 ];
 
